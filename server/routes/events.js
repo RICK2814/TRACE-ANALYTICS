@@ -169,6 +169,9 @@ router.get("/heatmap", requireAdmin, async (req, res, next) => {
       filter = { type: "click", url: rawTarget };
     }
 
+    const role = String(req.query.role || "all").toLowerCase();
+    if (["user", "admin", "guest"].includes(role)) filter.role = role;
+
     const clicks = await Event.find(
       filter,
       { x: 1, y: 1, page_w: 1, page_h: 1, _id: 0 }
