@@ -252,7 +252,7 @@ export default function Heatmap() {
                 {checkoutActivity.length > 0 && (
                   <div className="checkout-activity-list">
                     {checkoutActivity.map((entry, index) => (
-                      <article className="checkout-activity-card" key={entry.session_id || index}>
+                      <article className="checkout-activity-card" key={`${entry.session_id || index}-${entry.role || "legacy"}`}>
                         <div className="checkout-activity-card-head">
                           <div>
                             <strong>{entry.username || (entry.role === "admin" ? "Admin" : entry.role === "user" ? "User" : "Guest visitor")}</strong>
