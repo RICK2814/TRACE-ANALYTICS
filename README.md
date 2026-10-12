@@ -251,7 +251,7 @@ The following credentials are published for assignment evaluation only.
 | Website | Use the **Live HTML Website** link at the top of this README |
 | Role | Admin |
 | Username | `traceadmin` |
-| Password | `Admin123` |
+| Password | `admin123` |
 
 Open the linked HTML website, click its **Account** control, choose **Sign in to TRACE**, then select the Admin role and enter the credentials.
 
