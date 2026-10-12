@@ -200,7 +200,9 @@ router.get("/checkout-activity", requireAdmin, async (req, res, next) => {
 
     const latestBySession = new Map();
     for (const event of events) {
-      if (!latestBySession.has(event.session_id)) latestBySession.set(event.session_id, event);
+      // Keep User and Admin separate even when both test in the same browser profile.
+      const sessionRoleKey = String(event.session_id) + ":" + String(event.role || "legacy");
+      if (!latestBySession.has(sessionRoleKey)) latestBySession.set(sessionRoleKey, event);
     }
     res.json([...latestBySession.values()].slice(0, 100));
   } catch (err) { next(err); }
