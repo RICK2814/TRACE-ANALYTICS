@@ -147,7 +147,7 @@ export default function App() {
   }
 
   if (authStatus === "checking") {
-    return <div className="auth-shell"><div className="auth-card auth-loading"><span className="loading-indicator" /> Checking administrator session…</div></div>;
+    return <div className="auth-shell"><div className="auth-card auth-loading"><span className="loading-indicator" /> Checking account session…</div></div>;
   }
 
   if (authStatus !== "authenticated") {
@@ -169,7 +169,13 @@ export default function App() {
           </div>
           <div className="auth-eyebrow">PRIVATE WORKSPACE</div>
           <h1>{loginRole === "admin" ? "Admin sign in" : loginMode === "register" ? "Create user account" : "User sign in"}</h1>
-          <p className="auth-description">Sign in to review visitor sessions, user journeys and click heatmaps.</p>
+          <p className="auth-description">
+            {loginMode === "register"
+              ? "Create a user account to open the analytics workspace."
+              : loginRole === "admin"
+                ? "Administrator access to sessions, visitor journeys and click heatmaps."
+                : "Sign in to the analytics workspace with your user account."}
+          </p>
           <div className="auth-role-switch" role="group" aria-label="Account type">
             <button type="button" className={loginRole === "user" ? "selected" : ""} onClick={() => { setLoginRole("user"); setLoginMode("login"); setLoginError(""); }}>User</button>
             <button type="button" className={loginRole === "admin" ? "selected" : ""} onClick={() => { setLoginRole("admin"); setLoginMode("login"); setLoginError(""); }}>Admin</button>
@@ -180,7 +186,7 @@ export default function App() {
           <form className="auth-form" onSubmit={loginMode === "register" ? handleRegister : handleLogin}>
             <label>
               <span>Username</span>
-              <input value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} name="username" autoComplete="username" required />
+              <input value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} name="username" autoComplete="username" minLength={3} maxLength={32} required />
             </label>
             <label>
               <span>Password</span>
