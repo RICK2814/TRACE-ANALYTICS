@@ -65,7 +65,7 @@ Use the hosted application to review the Admin dashboard:
 |---|---|
 | Role | **Admin** |
 | Username | `traceadmin` |
-| Password | `admin123` |
+| Password | `Admin123` |
 
 1. Open the application and select **Admin** on the sign-in screen.
 2. Enter the credentials above and sign in.
