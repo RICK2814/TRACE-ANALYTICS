@@ -1,6 +1,7 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Event = require("../models/Event");
-const { requireAuth } = require("../middleware/adminAuth");
+const { requireAdmin } = require("../middleware/adminAuth");
 
 const router = express.Router();
 const TYPES = ["page_view", "click"];
@@ -40,8 +41,20 @@ router.post("/events", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Admin-only database check for demonstrations and troubleshooting.
+router.get("/db-status", requireAdmin, async (_req, res, next) => {
+  try {
+    const eventCount = await Event.countDocuments({});
+    res.json({
+      connected: mongoose.connection.readyState === 1,
+      collection: Event.collection.name,
+      eventCount
+    });
+  } catch (err) { next(err); }
+});
+
 // 2. Sessions with event counts
-router.get("/sessions", requireAuth, async (req, res, next) => {
+router.get("/sessions", requireAdmin, async (req, res, next) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 100, 500);
     const skip = Math.max(Number(req.query.skip) || 0, 0);
@@ -63,7 +76,7 @@ router.get("/sessions", requireAuth, async (req, res, next) => {
 });
 
 // 3. All events for one session, in order
-router.get("/sessions/:id/events", requireAuth, async (req, res, next) => {
+router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
   try {
     const events = await Event.find({ session_id: req.params.id })
       .sort({ timestamp: 1, _id: 1 }).lean();
@@ -72,7 +85,7 @@ router.get("/sessions/:id/events", requireAuth, async (req, res, next) => {
 });
 
 // 4a. Pages that have click data
-router.get("/pages", requireAuth, async (_req, res, next) => {
+router.get("/pages", requireAdmin, async (_req, res, next) => {
   try {
     const rows = await Event.aggregate([
       { $match: { type: "click" } },
@@ -85,7 +98,7 @@ router.get("/pages", requireAuth, async (_req, res, next) => {
 });
 
 // 4b. Click data for one page (heatmap)
-router.get("/heatmap", requireAuth, async (req, res, next) => {
+router.get("/heatmap", requireAdmin, async (req, res, next) => {
   try {
     if (!req.query.url) return res.status(400).json({ error: "url query param is required" });
     const clicks = await Event.find(
