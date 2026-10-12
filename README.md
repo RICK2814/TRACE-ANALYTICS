@@ -125,6 +125,12 @@ Troubleshooting: `/health` only confirms that the API process responds; use the 
 - The page list refreshes automatically while Heatmap is open and can also be refreshed with **Refresh pages**. Use **Open selected page** to open the selected route, click around, then refresh the selector.
 - `/checkout.html` is tracked by the same `/tracker.js`; once visits and clicks have reached the Events collection, choose `/checkout.html` from the page selector. If its recorded click count is zero, the map will explain that more interactions must be collected first.
 
+### Role-aware heatmap and checkout contents
+
+- New events record the actor role from the signed session cookie (User/Admin); unauthenticated visits are marked Guest. A role filter on the heatmap can show all activity, only Users, only Admin, or guests.
+- On `/checkout.html`, the demo records the latest cart product names, quantities and computed subtotal for each browser session, including when the cart is changed or the demo order is submitted. Delivery details and payment credentials are not captured.
+- Role tagging and cart snapshots apply to new events after this tracking update; older click records remain available under All activity but cannot reliably be retroactively assigned to a role.
+
 ### Shared activity and account dropdown
 
 - The Heatmap combines events from the production and preview hostnames of this TRACE Analytics Vercel app by URL pathname. This makes User and Admin browsing visible together when they visited the same app through different Vercel aliases.
