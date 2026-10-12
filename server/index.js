@@ -4,6 +4,7 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const routes = require("./routes/events");
 const authRoutes = require("./routes/auth");
+const workspaceRoutes = require("./routes/workspaces");
 const { ensureMongo } = require("./db");
 
 const app = express();
@@ -16,6 +17,7 @@ app.use("/api/events", rateLimit({ windowMs: 60_000, limit: 300, standardHeaders
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/workspaces", ensureMongo, workspaceRoutes);
 app.use("/api", ensureMongo, routes);
 
 app.use((err, _req, res, _next) => {
