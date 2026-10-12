@@ -7,6 +7,24 @@ const router = express.Router();
 const TYPES = ["page_view", "click", "cart_snapshot"];
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : undefined);
 
+function workspaceScope(req) {
+  const workspaceId = String(req.query.workspace_id || "default").trim().slice(0, 80) || "default";
+  if (workspaceId === "default") {
+    return {
+      $or: [
+        { workspace_id: "default" },
+        { workspace_id: { $exists: false } },
+        { workspace_id: null },
+      ],
+    };
+  }
+  return { workspace_id: workspaceId };
+}
+
+function scopedFilter(req, filter = {}) {
+  return { $and: [filter, workspaceScope(req)] };
+}
+
 // The same app can be opened through the production alias or a Vercel preview URL.
 // Combine those hostnames by pathname so Admin and User activity lands in one heatmap.
 function heatmapPageKey(raw) {
@@ -31,6 +49,7 @@ function clean(e, ua, actor) {
     session_id: String(e.session_id).slice(0, 100),
     type: e.type,
     url: String(e.url).slice(0, 2000),
+    workspace_id: typeof e.workspace_id === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(e.workspace_id) ? e.workspace_id : "default",
     timestamp: isNaN(ts) ? new Date() : ts,
     user_agent: ua,
     role: actor && ["admin", "user"].includes(actor.role) ? actor.role : "guest",
@@ -72,9 +91,9 @@ router.post("/events", async (req, res, next) => {
 });
 
 // Admin-only database check for demonstrations and troubleshooting.
-router.get("/db-status", requireAdmin, async (_req, res, next) => {
+router.get("/db-status", requireAdmin, async (req, res, next) => {
   try {
-    const eventCount = await Event.countDocuments({});
+    const eventCount = await Event.countDocuments(workspaceScope(req));
     res.json({
       connected: mongoose.connection.readyState === 1,
       collection: Event.collection.name,
@@ -89,6 +108,7 @@ router.get("/sessions", requireAdmin, async (req, res, next) => {
     const limit = Math.min(Number(req.query.limit) || 100, 500);
     const skip = Math.max(Number(req.query.skip) || 0, 0);
     const rows = await Event.aggregate([
+      { $match: scopedFilter(req, { type: { $in: ["page_view", "click"] } }) },
       { $group: {
           _id: "$session_id",
           total_events: { $sum: 1 },
@@ -108,7 +128,7 @@ router.get("/sessions", requireAdmin, async (req, res, next) => {
 // 3. All events for one session, in order
 router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
   try {
-    const events = await Event.find({ session_id: req.params.id })
+    const events = await Event.find(scopedFilter(req, { session_id: req.params.id, type: { $in: ["page_view", "click"] } }))
       .sort({ timestamp: 1, _id: 1 }).lean();
     res.json(events);
   } catch (err) { next(err); }
@@ -119,6 +139,7 @@ router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
 router.get("/pages", requireAdmin, async (_req, res, next) => {
   try {
     const rows = await Event.aggregate([
+      { $match: scopedFilter(req, { type: { $in: ["page_view", "click"] } }) },
       { $group: {
           _id: "$url",
           clicks: { $sum: { $cond: [{ $eq: ["$type", "click"] }, 1, 0] } },
@@ -173,7 +194,7 @@ router.get("/heatmap", requireAdmin, async (req, res, next) => {
     if (["user", "admin", "guest"].includes(role)) filter.role = role;
 
     const clicks = await Event.find(
-      filter,
+      scopedFilter(req, filter),
       { x: 1, y: 1, page_w: 1, page_h: 1, role: 1, username: 1, timestamp: 1, _id: 0 }
     ).limit(20000).lean();
     res.json(clicks);
@@ -193,7 +214,7 @@ router.get("/checkout-activity", requireAdmin, async (req, res, next) => {
     filter.url = { $regex: aliasPattern };
     if (["user", "admin", "guest"].includes(role)) filter.role = role;
 
-    const events = await Event.find(filter, {
+    const events = await Event.find(scopedFilter(req, filter), {
       session_id: 1, role: 1, username: 1, cart_items: 1,
       cart_total: 1, cart_stage: 1, timestamp: 1, _id: 0
     }).sort({ timestamp: -1 }).limit(1000).lean();
