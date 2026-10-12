@@ -38,6 +38,10 @@ export default function Heatmap() {
   const [pages, setPages] = useState(null);
   const [url, setUrl] = useState("");
   const [clicks, setClicks] = useState([]);
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [checkoutActivity, setCheckoutActivity] = useState([]);
+  const [loadingCheckoutActivity, setLoadingCheckoutActivity] = useState(false);
+  const [checkoutActivityError, setCheckoutActivityError] = useState("");
   const [error, setError] = useState("");
   const [showPage, setShowPage] = useState(true);
   const [loadingClicks, setLoadingClicks] = useState(false);
@@ -75,7 +79,7 @@ export default function Heatmap() {
     if (!url) { setClicks([]); return; }
     let cancelled = false;
     setLoadingClicks(true);
-    get(`/heatmap?url=${encodeURIComponent(url)}`)
+    get(`/heatmap?url=${encodeURIComponent(url)}&role=${encodeURIComponent(roleFilter)}`)
       .then((data) => {
         if (cancelled) return;
         setClicks(data.filter((c) => c.page_w > 0 && c.page_h > 0));
@@ -84,7 +88,25 @@ export default function Heatmap() {
       .catch((e) => { if (!cancelled) setError(e.message || "Could not load click data."); })
       .finally(() => { if (!cancelled) setLoadingClicks(false); });
     return () => { cancelled = true; };
-  }, [url, refreshTick]);
+  }, [url, roleFilter, refreshTick]);
+
+  useEffect(() => {
+    let path = "";
+    try { path = new URL(url, window.location.origin).pathname; } catch { path = url; }
+    if (path !== "/checkout.html") {
+      setCheckoutActivity([]);
+      setCheckoutActivityError("");
+      setLoadingCheckoutActivity(false);
+      return;
+    }
+    let cancelled = false;
+    setLoadingCheckoutActivity(true);
+    get(`/checkout-activity?role=${encodeURIComponent(roleFilter)}`)
+      .then((data) => { if (!cancelled) { setCheckoutActivity(Array.isArray(data) ? data : []); setCheckoutActivityError(""); } })
+      .catch((e) => { if (!cancelled) setCheckoutActivityError(e.message || "Could not load checkout cart activity."); })
+      .finally(() => { if (!cancelled) setLoadingCheckoutActivity(false); });
+    return () => { cancelled = true; };
+  }, [url, roleFilter, refreshTick]);
 
   useEffect(() => {
     const el = boxRef.current;
@@ -158,10 +180,17 @@ export default function Heatmap() {
                 return <option key={page.url} value={page.url}>{label} — {clickCount} clicks · {viewCount} views</option>;
               })}
             </select>
+            <label className="field-label" htmlFor="heatmap-activity-filter">VISITOR ACTIVITY</label>
+            <select id="heatmap-activity-filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} aria-label="Filter activity by visitor role">
+              <option value="all">All activity — Users + Admin + guests</option>
+              <option value="user">Users only</option>
+              <option value="admin">Admin only</option>
+              <option value="guest">Guests / signed-out visitors</option>
+            </select>
             <div className="heatmap-page-meta">
               <span className="page-meta-path">{selectedPage?.url ? (() => { try { return new URL(selectedPage.url).pathname; } catch { return selectedPage.url; } })() : "Select a page"}</span>
               <span className="page-meta-divider" />
-              <span>{selectedPage?.clicks ?? clicks.length} recorded clicks</span>
+              <span>{clicks.length} clicks in this view</span>
               <span className="page-meta-divider" />
               <span>{selectedPage?.page_views ?? 0} page views</span>
             </div>
@@ -181,7 +210,7 @@ export default function Heatmap() {
               </div>
               <div className="canvas-wrap" style={{ height }}>
                 {showPage && (
-                  <iframe src={url} title="Tracked page preview" scrolling="no" tabIndex={-1}
+                  <iframe src={`${url}${url.includes("?") ? "&" : "?"}traceHeatmapPreview=1`} title="Tracked page preview" scrolling="no" tabIndex={-1}
                     style={{ width: dims.w, height: dims.h, transform: `scale(${scale})` }} />
                 )}
                 <canvas ref={canvasRef} style={{ width, height }} aria-label="Click density overlay" />
@@ -197,6 +226,56 @@ export default function Heatmap() {
               </div>
             </div>
           )}
+
+          {(() => {
+            let path = "";
+            try { path = new URL(url, window.location.origin).pathname; } catch { path = url; }
+            if (path !== "/checkout.html") return null;
+            return (
+              <section className="checkout-activity-panel">
+                <div className="checkout-activity-heading">
+                  <div>
+                    <div className="panel-kicker">CHECKOUT VISITOR DATA</div>
+                    <h3>What visitors have in their pack</h3>
+                    <p>Latest saved product names, quantities and estimated subtotal per session. Delivery details and payment credentials are not collected.</p>
+                  </div>
+                  <span className="checkout-activity-count">{checkoutActivity.length} sessions</span>
+                </div>
+                {checkoutActivityError && <p className="error">Could not load checkout contents: {checkoutActivityError}</p>}
+                {loadingCheckoutActivity && <div className="inline-state"><span className="loading-indicator" /> Loading checkout contents…</div>}
+                {!loadingCheckoutActivity && !checkoutActivityError && checkoutActivity.length === 0 && (
+                  <div className="empty-state compact-empty">
+                    <strong>No checkout cart snapshots yet</strong>
+                    <p>Open the site as a User, add products, visit Checkout, then refresh this dashboard. Only new visits from now on will include role-tagged cart contents.</p>
+                  </div>
+                )}
+                {checkoutActivity.length > 0 && (
+                  <div className="checkout-activity-list">
+                    {checkoutActivity.map((entry, index) => (
+                      <article className="checkout-activity-card" key={entry.session_id || index}>
+                        <div className="checkout-activity-card-head">
+                          <div>
+                            <strong>{entry.username || (entry.role === "admin" ? "Admin" : entry.role === "user" ? "User" : "Guest visitor")}</strong>
+                            <span className={`activity-role activity-role-${entry.role || "guest"}`}>{String(entry.role || "legacy").toUpperCase()}</span>
+                          </div>
+                          <span className="checkout-activity-stage">{String(entry.cart_stage || "recorded").replaceAll("_", " ")}</span>
+                        </div>
+                        <div className="checkout-activity-session">Session {String(entry.session_id || "").slice(0, 12)} · {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : "Time unavailable"}</div>
+                        {entry.cart_items?.length ? (
+                          <div className="checkout-activity-items">
+                            {entry.cart_items.map((item, itemIndex) => (
+                              <div key={itemIndex}><span>{item.name} × {item.quantity}</span><strong>{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(Number(item.price || 0) * Number(item.quantity || 0))}</strong></div>
+                            ))}
+                          </div>
+                        ) : <p className="checkout-activity-empty-cart">No products in this cart snapshot.</p>}
+                        <div className="checkout-activity-total"><span>Estimated subtotal</span><strong>{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(Number(entry.cart_total || 0))}</strong></div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })()}
         </>
       )}
     </section>
