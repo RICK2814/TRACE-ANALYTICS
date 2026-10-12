@@ -174,7 +174,7 @@ router.get("/heatmap", requireAdmin, async (req, res, next) => {
 
     const clicks = await Event.find(
       filter,
-      { x: 1, y: 1, page_w: 1, page_h: 1, _id: 0 }
+      { x: 1, y: 1, page_w: 1, page_h: 1, role: 1, username: 1, timestamp: 1, _id: 0 }
     ).limit(20000).lean();
     res.json(clicks);
   } catch (err) { next(err); }
