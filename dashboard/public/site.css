@@ -65,3 +65,52 @@ main{overflow:clip}.hero{display:grid;grid-template-columns:minmax(330px,.86fr) 
   .bag-button { gap: 5px; padding-right: 6px; padding-left: 6px; }
   .signout-button { padding-right: 6px; padding-left: 6px; }
 }
+
+
+/* Account actions: show a login destination to guests and the signed-in name to users. */
+.signin-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--forest);
+  color: var(--forest);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.signin-link:hover { color: white; background: var(--forest); }
+.signin-link[hidden] { display: none; }
+.site-nav .signout-button {
+  min-height: 32px;
+  padding: 7px 10px;
+  border-color: #c6c9bf;
+  color: var(--forest);
+  background: transparent;
+  font-size: 10px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.site-nav .signout-button:hover { color: white; background: var(--forest); }
+.site-nav .signout-button[hidden] { display: none; }
+
+@media (max-width: 720px) {
+  .signin-link { min-height: 34px; padding: 6px 8px; font-size: 9px; }
+  .site-nav .signout-button { align-self: flex-start; margin-top: 8px; }
+  .account-pill { max-width: 108px; }
+  .account-copy strong { max-width: 54px; }
+}
+@media (max-width: 420px) {
+  .brand { gap: 7px; }
+  .brand-word { font-size: 9px; letter-spacing: .13em; }
+  .brand-word small { max-width: 96px; font-size: 6px; letter-spacing: .08em; }
+  .signin-link { padding-right: 6px; padding-left: 6px; font-size: 8px; }
+  .bag-button { gap: 5px; padding-right: 6px; padding-left: 6px; }
+  .account-copy small { display: none; }
+}
