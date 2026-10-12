@@ -247,6 +247,7 @@
   var FREE_SHIPPING_THRESHOLD = 4999;
   var SHIPPING_FEE = 99;
   var cart = readCart();
+  var firstCartSnapshot = true;
 
   function readCart() {
     try {
@@ -264,6 +265,17 @@
         };
       });
     } catch (_) { return []; }
+  }
+
+  function sendCartSnapshot(stage) {
+    if (!window.traceTrack || typeof window.traceTrack.send !== "function") return;
+    window.traceTrack.send({
+      type: "cart_snapshot",
+      cart_stage: stage || (cart.length ? "updated" : "empty"),
+      cart_items: cart.map(function (item) {
+        return { name: item.name, price: item.price, quantity: item.quantity };
+      })
+    });
   }
 
   function money(amount) {
@@ -382,6 +394,8 @@
     document.getElementById("cart-items").hidden = empty;
     document.querySelector(".checkout-continue").hidden = empty;
     document.getElementById("place-order").disabled = empty;
+    sendCartSnapshot(empty ? "empty" : (firstCartSnapshot ? "viewed" : "updated"));
+    firstCartSnapshot = false;
   }
 
   function selectedPayment() {
@@ -417,6 +431,7 @@
       return;
     }
 
+    sendCartSnapshot("order_submitted");
     var orderId = "TC-DEMO-" + String(Date.now()).slice(-8);
     var method = selectedPayment();
     var methodLabel = {
