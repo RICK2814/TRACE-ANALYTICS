@@ -62,28 +62,25 @@ Event shape:
   "timestamp": "2026-01-01T10:00:00Z", "x": 320, "y": 740, "page_w": 1280, "page_h": 2400 }
 ```
 
-## Deploy the entire app to one Vercel URL
+## Deploy the whole app to one Vercel URL
 
-This repo is configured to run as a **single Vercel project and one public domain**:
+This repo uses Vercel Services so the dashboard, API, and tracked demo pages share **one deployment URL**:
 
 - `/` — React dashboard
 - `/api/...` — Express API
 - `/health` — API health check
-- `/demo.html` and `/demo2.html` — tracked demo pages
-- `/tracker.js` — browser tracking script
-- MongoDB Atlas remains the managed database and is accessed privately by the API; it does not need a public app URL.
+- `/demo.html`, `/demo2.html`, and `/tracker.js` — static tracked demo site, served by the dashboard service
+- MongoDB Atlas — external managed database, accessed by the backend only
 
 ### Vercel steps
 
 1. Import `RICK2814/TRACE-ANALYTICS` from [Vercel](https://vercel.com/new).
-2. Set **Root Directory** to the repository root. Do not select `server` or `dashboard`.
-3. Use the Express/Node.js preset and Build Command `npm run build` (also set in `vercel.json`).
-4. Add `MONGO_URI` in Vercel Environment Variables with your MongoDB Atlas connection string. Never commit the actual connection string.
-5. Deploy. The build combines the dashboard and demo pages into Vercel's `public/` folder, while Express handles API requests on the same domain.
+2. Use the **multi-service project** option. The repository-root `vercel.json` defines the Dashboard and Backend services and their shared-domain routes. Do not import only the `dashboard` or `server` folder as a standalone project.
+3. Add `MONGO_URI` in Vercel Environment Variables using the MongoDB Atlas connection string. Do not commit real secrets. This variable is required by the backend.
+4. Deploy. Vercel routes `/api/*` and `/health` to Express and other paths to the Vite dashboard/static assets.
+5. Verify the deployment URL at `/health` (expected response: `{"ok":true}`), open `/`, and use `/demo.html` to generate tracked sessions/clicks.
 
-After deployment, check `/health` (expected response: `{"ok":true}`), open `/`, then open `/demo.html` and click on the page. Return to `/` to inspect Sessions and Click heatmap.
-
-Keep a least-privilege MongoDB database user and configure Atlas network access to allow the deployed backend. This prototype does not implement dashboard authentication, so do not expose real customer analytics until access control, privacy notices, and data-retention rules are added.
+MongoDB Atlas remains a separate managed database service; it does not require its own public application URL. Configure Atlas database-user permissions and network access before launch. This prototype does not implement dashboard authentication, so don't expose real customer analytics until access control, privacy notices, and retention rules are added.
 
 ## Assumptions and trade-offs
 - **Sessions:** a UUID in localStorage, renewed after 30 minutes of inactivity. It is not shared across subdomains.
