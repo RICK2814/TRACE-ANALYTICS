@@ -1,10 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Event = require("../models/Event");
-const { requireAdmin } = require("../middleware/adminAuth");
+const { requireAdmin, currentUser } = require("../middleware/adminAuth");
 
 const router = express.Router();
-const TYPES = ["page_view", "click"];
+const TYPES = ["page_view", "click", "cart_snapshot"];
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : undefined);
 
 // The same app can be opened through the production alias or a Vercel preview URL.
@@ -22,7 +22,7 @@ function heatmapPageKey(raw) {
   }
 }
 
-function clean(e, ua) {
+function clean(e, ua, actor) {
   if (!e || typeof e !== "object") return null;
   if (!e.session_id || !TYPES.includes(e.type) || !e.url) return null;
 
@@ -33,7 +33,21 @@ function clean(e, ua) {
     url: String(e.url).slice(0, 2000),
     timestamp: isNaN(ts) ? new Date() : ts,
     user_agent: ua,
+    role: actor && ["admin", "user"].includes(actor.role) ? actor.role : "guest",
+    ...(actor && actor.username ? { username: String(actor.username).slice(0, 32) } : {}),
   };
+  if (e.type === "cart_snapshot") {
+    if (!Array.isArray(e.cart_items)) return null;
+    doc.cart_items = e.cart_items.slice(0, 40).map((item) => ({
+      name: typeof item?.name === "string" ? item.name.trim().slice(0, 120) : "",
+      price: num(item?.price),
+      quantity: num(item?.quantity),
+    })).filter((item) => item.name && item.price !== undefined && item.price > 0 &&
+      item.quantity !== undefined && item.quantity >= 1 && item.quantity <= 99);
+    doc.cart_total = doc.cart_items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    doc.cart_stage = ["viewed", "updated", "empty", "order_submitted"].includes(e.cart_stage)
+      ? e.cart_stage : (doc.cart_items.length ? "updated" : "empty");
+  }
   if (e.type === "click") {
     doc.x = num(e.x);
     doc.y = num(e.y);
@@ -49,7 +63,8 @@ router.post("/events", async (req, res, next) => {
   try {
     const list = (Array.isArray(req.body) ? req.body : [req.body]).slice(0, 100);
     const ua = (req.get("user-agent") || "").slice(0, 300);
-    const docs = list.map((e) => clean(e, ua)).filter(Boolean);
+    const actor = currentUser(req);
+    const docs = list.map((e) => clean(e, ua, actor)).filter(Boolean);
     if (!docs.length) return res.status(400).json({ error: "No valid events" });
     await Event.insertMany(docs, { ordered: false });
     res.status(201).json({ stored: docs.length });
@@ -162,6 +177,31 @@ router.get("/heatmap", requireAdmin, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+ 
+// Latest cart contents per browser session for the checkout page. Delivery details are never stored here.
+router.get("/checkout-activity", requireAdmin, async (req, res, next) => {
+  try {
+    const role = String(req.query.role || "all").toLowerCase();
+    const filter = { type: "cart_snapshot" };
+    const aliasPattern = new RegExp(
+      "^https?://trace-analytics[^/]*\\.vercel\\.app/checkout\\.html$",
+      "i"
+    );
+    filter.url = { $regex: aliasPattern };
+    if (["user", "admin", "guest"].includes(role)) filter.role = role;
+
+    const events = await Event.find(filter, {
+      session_id: 1, role: 1, username: 1, cart_items: 1,
+      cart_total: 1, cart_stage: 1, timestamp: 1, _id: 0
+    }).sort({ timestamp: -1 }).limit(1000).lean();
+
+    const latestBySession = new Map();
+    for (const event of events) {
+      if (!latestBySession.has(event.session_id)) latestBySession.set(event.session_id, event);
+    }
+    res.json([...latestBySession.values()].slice(0, 100));
+  } catch (err) { next(err); }
+});
 
 
 module.exports = router;
