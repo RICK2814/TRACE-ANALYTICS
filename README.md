@@ -103,3 +103,9 @@ Troubleshooting: `/health` only confirms that the API process responds; use the 
 - **Events are sent one at a time** with `keepalive` so they survive navigation. Batching would reduce requests.
 - Dashboard analytics reads require a signed HttpOnly session cookie with the Admin role. User registration is public and creates only User accounts; after sign-in, Users are sent to the tracked demo and analytics reads return 403 for them. Event writes remain public so tracked pages can send events, and are rate limited and size capped.
 - **Client timestamps** are used for ordering. The server time is stored as `receivedAt`.
+
+### Demo account display and Indian pricing
+
+- On the tracked demo pages, the signed-in username, first-letter avatar and role are loaded from `/api/auth/me`. Sign out clears the session and returns to the login page.
+- Storefront example prices and the free-shipping threshold are displayed in Indian rupees (`₹`). They are illustrative demo prices, not live inventory or actual Flipkart/Amazon listings.
+- The existing tracking script remains enabled on both `/demo.html` and `/demo2.html`; clicks and page views still feed the Admin analytics.
