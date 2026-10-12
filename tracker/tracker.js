@@ -9,6 +9,9 @@
   var KEY = "cf_session";
   var TIMEOUT = 30 * 60 * 1000;
 
+  // The dashboard iframe is a read-only visual preview, not a real visitor session.
+  if (new URLSearchParams(window.location.search).get("traceHeatmapPreview") === "1") return;
+
   function uuid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
     return "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
