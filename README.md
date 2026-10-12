@@ -2,10 +2,10 @@
 
 **Full-stack website interaction analytics for the Full Stack Engineer assignment.** TRACE Analytics captures browser page views and clicks, stores events in MongoDB, and presents session activity, user journeys, and click heatmaps through an authenticated dashboard.
 
-**Live HTML Website:** [Open the website](https://trace-analytics-one.vercel.app/demo.html)  
+**Hosted Application:** [Open TRACE Analytics](https://trace-analytics-one.vercel.app/)  
 **Source Code:** [RICK2814/TRACE-ANALYTICS](https://github.com/RICK2814/TRACE-ANALYTICS)
 
-> The linked HTML page above is the single public website showcased in this README. The dashboard and API support the assignment behind the scenes. GitHub `main` is the source of truth; the live deployment may not contain every newest source change until Vercel deploys it.
+> The hosted application link opens TRACE Analytics. The replacement HTML website has not been added because the `index.html` attachment received in this conversation was empty (0 bytes); the repository still contains its earlier example page. GitHub `main` is the source of truth, while the live deployment may lag behind the newest source revision.
 
 ---
 
