@@ -125,6 +125,13 @@ Troubleshooting: `/health` only confirms that the API process responds; use the 
 - The page list refreshes automatically while Heatmap is open and can also be refreshed with **Refresh pages**. Use **Open selected page** to open the selected route, click around, then refresh the selector.
 - `/checkout.html` is tracked by the same `/tracker.js`; once visits and clicks have reached the Events collection, choose `/checkout.html` from the page selector. If its recorded click count is zero, the map will explain that more interactions must be collected first.
 
+### Multiple analytics workspaces
+
+- Admins can create as many workspaces as needed from the workspace switcher in the sidebar. Workspace names must be 2–60 characters and unique within the same admin account; there is no fixed workspace-count limit.
+- Switching workspaces changes the scope for Sessions, User Journey, page lists, click heatmaps and checkout cart snapshots. Workspace records and events are stored in MongoDB.
+- Use **Copy tracking link** inside a workspace menu to create a URL for that workspace. Share that link with visitors; the tracker keeps the workspace ID for the rest of the same-origin browsing flow.
+- Legacy events without a workspace ID remain visible in the default **Trace workspace**. New events from workspace-specific demo links are grouped under the specified workspace.
+
 ### Role-aware heatmap and checkout contents
 
 - New events record the actor role from the signed session cookie (User/Admin); unauthenticated visits are marked Guest. A role filter on the heatmap can show all activity, only Users, only Admin, or guests.
