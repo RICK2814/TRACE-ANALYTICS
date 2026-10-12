@@ -65,7 +65,7 @@ export default function Heatmap() {
     return () => { cancelled = true; };
   }, [refreshTick]);
 
-  // Keep the page list current while the dashboard is open; the manual refresh is available too.
+  // Keep the page list and selected page click positions current while the dashboard is open.
   useEffect(() => {
     const timer = window.setInterval(() => setRefreshTick((tick) => tick + 1), 15000);
     return () => window.clearInterval(timer);
@@ -84,7 +84,7 @@ export default function Heatmap() {
       .catch((e) => { if (!cancelled) setError(e.message || "Could not load click data."); })
       .finally(() => { if (!cancelled) setLoadingClicks(false); });
     return () => { cancelled = true; };
-  }, [url]);
+  }, [url, refreshTick]);
 
   useEffect(() => {
     const el = boxRef.current;
