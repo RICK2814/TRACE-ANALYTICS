@@ -11,7 +11,7 @@ const {
 
 const router = express.Router();
 const scrypt = promisify(crypto.scrypt);
-const usernamePattern = /^[^\\u0000-\\u001F\\u007F-\\u009F]{3,32}$/u;
+const usernamePattern = /^[^\x00-\x1F\x7F-\x9F]{3,32}$/u;
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
