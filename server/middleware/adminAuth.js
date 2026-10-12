@@ -1,13 +1,18 @@
 const crypto = require("node:crypto");
 
-const COOKIE_NAME = "trace_admin_session";
+const COOKIE_NAME = "trace_session";
 const SESSION_SECONDS = 8 * 60 * 60;
+
+function getSessionSecret() {
+  const secret = process.env.SESSION_SECRET;
+  return secret && secret.length >= 32 ? secret : null;
+}
 
 function getConfig() {
   const username = process.env.ADMIN_USERNAME;
   const password = process.env.ADMIN_PASSWORD;
-  const secret = process.env.SESSION_SECRET;
-  if (!username || !password || !secret || secret.length < 32) return null;
+  const secret = getSessionSecret();
+  if (!username || !password || !secret) return null;
   return { username, password, secret };
 }
 
@@ -22,14 +27,15 @@ function sign(body, secret) {
   return crypto.createHmac("sha256", secret).update(body).digest("base64url");
 }
 
-function createAdminToken(username) {
-  const config = getConfig();
-  if (!config) throw new Error("Admin authentication is not configured");
+function createSessionToken(username, role) {
+  const secret = getSessionSecret();
+  if (!secret) throw new Error("SESSION_SECRET must be configured with at least 32 characters");
   const body = Buffer.from(JSON.stringify({
     sub: username,
+    role: role,
     exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS
   })).toString("base64url");
-  return body + "." + sign(body, config.secret);
+  return body + "." + sign(body, secret);
 }
 
 function tokenPayload(token, secret) {
@@ -40,7 +46,8 @@ function tokenPayload(token, secret) {
   if (!safeEqual(parts[1], expected)) return null;
   try {
     const payload = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
-    if (!payload.sub || !Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+    if (!payload.sub || !["admin", "user"].includes(payload.role) ||
+      !Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) return null;
     return payload;
   } catch {
     return null;
@@ -57,45 +64,47 @@ function cookieValue(req) {
   return "";
 }
 
-function currentAdmin(req) {
-  const config = getConfig();
-  if (!config) return null;
-  const payload = tokenPayload(cookieValue(req), config.secret);
-  return payload ? { username: payload.sub } : null;
+function currentUser(req) {
+  const secret = getSessionSecret();
+  if (!secret) return null;
+  const payload = tokenPayload(cookieValue(req), secret);
+  return payload ? { username: payload.sub, role: payload.role } : null;
 }
 
-function adminCookie(token) {
+function sessionCookie(token) {
   const secure = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
   return COOKIE_NAME + "=" + token +
     "; Path=/; HttpOnly; SameSite=Strict; Max-Age=" + SESSION_SECONDS +
     (secure ? "; Secure" : "");
 }
 
-function expiredAdminCookie() {
+function expiredSessionCookie() {
   const secure = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
   return COOKIE_NAME + "=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0" +
     (secure ? "; Secure" : "");
 }
 
-function requireAdmin(req, res, next) {
-  const config = getConfig();
-  if (!config) {
+function requireAuth(req, res, next) {
+  if (!getSessionSecret()) {
     return res.status(503).json({
-      error: "Admin authentication is not configured. Set ADMIN_USERNAME, ADMIN_PASSWORD and a SESSION_SECRET of at least 32 characters."
+      error: "Authentication is not configured. Set SESSION_SECRET to a random value of at least 32 characters."
     });
   }
-  const admin = currentAdmin(req);
-  if (!admin) return res.status(401).json({ error: "Admin login required" });
-  req.admin = admin;
+  const user = currentUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in to view analytics." });
+  req.auth = user;
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  const user = currentUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in as an administrator." });
+  if (user.role !== "admin") return res.status(403).json({ error: "Administrator access required." });
+  req.auth = user;
   next();
 }
 
 module.exports = {
-  getConfig,
-  safeEqual,
-  createAdminToken,
-  currentAdmin,
-  adminCookie,
-  expiredAdminCookie,
-  requireAdmin
+  getSessionSecret, getConfig, safeEqual, createSessionToken, currentUser,
+  sessionCookie, expiredSessionCookie, requireAuth, requireAdmin
 };
