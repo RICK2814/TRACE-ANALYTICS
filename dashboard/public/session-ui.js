@@ -44,9 +44,23 @@
     if (event.key === "Escape") closeMenu();
   });
 
-  (new URLSearchParams(window.location.search).get("traceHeatmapPreview") === "1"
-    ? Promise.resolve(null)
-    : fetch(API + "/auth/me", { credentials: "include", cache: "no-store" }))
+  var previewParams = new URLSearchParams(window.location.search);
+  var isHeatmapPreview = previewParams.get("traceHeatmapPreview") === "1";
+  if (isHeatmapPreview) {
+    var previewUsername = String(previewParams.get("tracePreviewUsername") || "").trim();
+    var previewRole = String(previewParams.get("tracePreviewRole") || "user").toUpperCase();
+    var previewDisplayName = previewUsername || (previewRole === "ADMIN" ? "Admin name not captured yet" : previewRole === "GUEST" ? "Guest visitor" : "User name not captured yet");
+    if (nameNode) nameNode.textContent = previewDisplayName;
+    if (avatarNode) avatarNode.textContent = (Array.from(previewDisplayName.trim())[0] || "U").toUpperCase();
+    if (roleNode) roleNode.textContent = previewRole + " PREVIEW";
+    if (menuTitle) menuTitle.textContent = "Previewing " + previewDisplayName;
+    if (menuDescription) menuDescription.textContent = "Analytics preview only — not a live signed-in account.";
+    signIn.hidden = true;
+    signOut.hidden = true;
+    return;
+  }
+
+  fetch(API + "/auth/me", { credentials: "include", cache: "no-store" })
     .then(function (response) {
       if (!response || !response.ok) return null;
       return response.json();
