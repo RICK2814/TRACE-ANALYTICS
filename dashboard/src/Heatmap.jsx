@@ -132,6 +132,23 @@ export default function Heatmap() {
   const scale = width / dims.w;
   const height = dims.h * scale;
   const selectedPage = pages?.find((page) => page.url === url);
+  const activeWorkspaceId = (() => {
+    try { return localStorage.getItem("traceAnalyticsActiveWorkspace") || "default"; } catch { return "default"; }
+  })();
+
+  const openSelectedUrl = useMemo(() => {
+    if (!url) return "";
+    try {
+      const parsed = new URL(url, window.location.origin);
+      parsed.searchParams.set("workspace", activeWorkspaceId);
+      parsed.searchParams.delete("traceHeatmapPreview");
+      parsed.searchParams.delete("tracePreviewRole");
+      parsed.searchParams.delete("tracePreviewUsername");
+      return parsed.pathname + parsed.search + parsed.hash;
+    } catch {
+      return url;
+    }
+  }, [url, activeWorkspaceId]);
 
   const previewIdentity = useMemo(() => {
     const matchesRole = (entry) => roleFilter === "all" || entry.role === roleFilter;
@@ -153,6 +170,7 @@ export default function Heatmap() {
     if (!url) return "";
     try {
       const parsed = new URL(url, window.location.origin);
+      parsed.searchParams.set("workspace", activeWorkspaceId);
       parsed.searchParams.set("traceHeatmapPreview", "1");
       parsed.searchParams.set("tracePreviewRole", previewIdentity.role);
       parsed.searchParams.set("tracePreviewUsername", previewIdentity.username);
@@ -160,7 +178,7 @@ export default function Heatmap() {
     } catch {
       return url;
     }
-  }, [url, previewIdentity]);
+  }, [url, previewIdentity, activeWorkspaceId]);
 
   useEffect(() => {
     if (canvasRef.current && clicks.length) paint(canvasRef.current, clicks, width, height);
@@ -227,7 +245,7 @@ export default function Heatmap() {
               <button type="button" onClick={() => setRefreshTick((tick) => tick + 1)} disabled={loadingPages}>
                 {loadingPages ? "Refreshing…" : "Refresh pages"}
               </button>
-              {url && <a href={url} target="_blank" rel="noreferrer">Open selected page ↗</a>}
+              {url && <a href={openSelectedUrl} target="_blank" rel="noreferrer">Open selected page ↗</a>}
             </div>
           </div>
 
