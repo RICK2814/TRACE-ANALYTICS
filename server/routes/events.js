@@ -146,7 +146,7 @@ router.get("/heatmap", requireAdmin, async (req, res, next) => {
 
     if (targetKey.startsWith("/")) {
       const aliasPattern = new RegExp(
-        "^https?://trace-analytics[^/]*\\.vercel\\.app" + targetKey.replace(/\./g, "\\\\.") + "$",
+        "^https?://trace-analytics[^/]*\\.vercel\\.app" + targetKey.split(".").join("\\.") + "$",
         "i"
       );
       filter = { type: "click", url: { $regex: aliasPattern } };
