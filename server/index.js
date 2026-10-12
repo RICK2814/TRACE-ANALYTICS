@@ -4,10 +4,11 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
 const routes = require("./routes/events");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 const origins = (process.env.CORS_ORIGIN || "*").split(",").map((s) => s.trim());
-app.use(cors({ origin: origins.includes("*") ? true : origins }));
+app.use(cors({ origin: origins.includes("*") ? true : origins, credentials: true }));
 
 // text/plain is accepted so the tracker can POST without a CORS preflight.
 app.use(express.json({ limit: "100kb", type: ["application/json", "text/plain"] }));
@@ -35,6 +36,7 @@ async function ensureMongo(_req, _res, next) {
     next(error);
   }
 }
+app.use("/api/auth", authRoutes);
 app.use("/api", ensureMongo, routes);
 
 app.use((err, _req, res, _next) => {

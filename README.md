@@ -64,7 +64,7 @@ Event shape:
 
 ## Deploy the whole app to one Vercel URL
 
-This repo uses Vercel Services so the dashboard, API, and tracked demo pages share **one deployment URL**:
+This repo uses Vercel Services so the dashboard, API, and tracked demo pages share **one deployment URL**. The demo is public; analytics views and read APIs require admin sign-in:
 
 - `/` — React dashboard
 - `/api/...` — Express API
@@ -76,9 +76,9 @@ This repo uses Vercel Services so the dashboard, API, and tracked demo pages sha
 
 1. Import `RICK2814/TRACE-ANALYTICS` from [Vercel](https://vercel.com/new).
 2. Use the **multi-service project** option. The repository-root `vercel.json` defines the Dashboard and Backend services and their shared-domain routes. Do not import only the `dashboard` or `server` folder as a standalone project.
-3. Add `MONGO_URI` in Vercel Environment Variables using the MongoDB Atlas connection string. Do not commit real secrets. This variable is required by the backend.
+3. Add `MONGO_URI`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SESSION_SECRET` in the backend service's Vercel Environment Variables. Use a unique, strong admin password and a random `SESSION_SECRET` of at least 32 characters. Never commit real secrets.
 4. Deploy. Vercel routes `/api/*` and `/health` to Express and other paths to the Vite dashboard/static assets.
-5. Verify the deployment URL at `/health` (expected response: `{"ok":true}`), open `/`, and use `/demo.html` to generate tracked sessions/clicks.
+5. Verify `/health` (expected response: `{"ok":true}`). Visit `/` and sign in with the configured admin credentials. The public `/demo.html` records visits/clicks; return to the admin dashboard to inspect Sessions and Click heatmap. Add events by clicking the demo from another browser/device.
 
 MongoDB Atlas remains a separate managed database service; it does not require its own public application URL. Configure Atlas database-user permissions and network access before launch. This prototype does not implement dashboard authentication, so don't expose real customer analytics until access control, privacy notices, and retention rules are added.
 
