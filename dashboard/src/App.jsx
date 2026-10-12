@@ -37,6 +37,7 @@ function Icon({ name, size = 18 }) {
 export default function App() {
   const [tab, setTab] = useState("sessions");
   const isSessions = tab === "sessions";
+  const isLocalEnvironment = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
   return (
     <div className="product-shell">
@@ -59,7 +60,7 @@ export default function App() {
           <div className="workspace-avatar">LD</div>
           <div className="workspace-copy">
             <small>WORKSPACE</small>
-            <strong>Local development</strong>
+            <strong>{isLocalEnvironment ? "Local development" : "Trace workspace"}</strong>
           </div>
           <span className="workspace-chevron"><Icon name="chevron" size={14} /></span>
         </div>
@@ -92,8 +93,8 @@ export default function App() {
           <div className="connection-card">
             <div className="connection-icon"><Icon name="database" size={17} /></div>
             <div>
-              <strong>Local environment</strong>
-              <span>API · localhost:4000</span>
+              <strong>{isLocalEnvironment ? "Local environment" : "Connected environment"}</strong>
+              <span>{isLocalEnvironment ? "API · localhost:4000" : "API · same domain"}</span>
             </div>
             <span className="connection-dot" title="Local environment" />
           </div>
@@ -109,8 +110,8 @@ export default function App() {
             <strong>Analytics</strong>
           </div>
           <div className="utility-status">
-            <span className="environment-pill"><span /> Local preview</span>
-            <div className="user-avatar" aria-label="Local user">R</div>
+            <span className="environment-pill"><span /> {isLocalEnvironment ? "Local preview" : "Live environment"}</span>
+            <div className="user-avatar" aria-label="Trace user">R</div>
           </div>
         </header>
 
@@ -141,7 +142,7 @@ export default function App() {
 
           <footer className="page-footer">
             <span><strong>trace.</strong> Behaviour analytics</span>
-            <span>Local prototype · Data collected by your tracking script</span>
+            <span>{isLocalEnvironment ? "Local prototype" : "Live application"} · Data collected by your tracking script</span>
           </footer>
         </main>
       </div>
