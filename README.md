@@ -55,6 +55,7 @@ npm run dev               # http://localhost:5173
 | GET | `/api/sessions/:id/events` | Ordered events for a session |
 | GET | `/api/pages` | Pages that have click data |
 | GET | `/api/heatmap?url=...` | Click coordinates for a page |
+| GET | `/api/db-status` | Admin-only check: MongoDB connection, collection name, and event count |
 
 Event shape:
 ```json
@@ -64,7 +65,7 @@ Event shape:
 
 ## Deploy the whole app to one Vercel URL
 
-This repo uses Vercel Services so the dashboard, API, and tracked demo pages share **one deployment URL**. The demo is public; analytics views and read APIs require either an Admin or User sign-in:
+This repo uses Vercel Services so the dashboard, API, and tracked demo pages share **one deployment URL**. The tracked demo pages are public, but analytics views and all analytics read APIs require an Admin sign-in:
 
 - `/` — React dashboard
 - `/api/...` — Express API
@@ -78,9 +79,21 @@ This repo uses Vercel Services so the dashboard, API, and tracked demo pages sha
 2. Use the **multi-service project** option. The repository-root `vercel.json` defines the Dashboard and Backend services and their shared-domain routes. Do not import only the `dashboard` or `server` folder as a standalone project.
 3. Add `MONGO_URI`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SESSION_SECRET` in the backend service's Vercel Environment Variables. Use a unique, strong admin password and a random `SESSION_SECRET` of at least 32 characters. Never commit real secrets.
 4. Deploy. Vercel routes `/api/*` and `/health` to Express and other paths to the Vite dashboard/static assets.
-5. Verify `/health` (expected response: `{"ok":true}`). Visit `/` to choose Admin or User. Admin uses the configured environment credentials; User can create an account and sign in. Both roles can view analytics as requested. The public `/demo.html` records visits/clicks; return to the admin dashboard to inspect Sessions and Click heatmap. Add events by clicking the demo from another browser/device.
+5. Verify `/health` (expected response: `{"ok":true}`). Visit `/` to choose Admin or User. Admin uses the configured environment credentials; after sign-in, Admin stays on the analytics dashboard. A User can create an account or sign in and is redirected to `/demo.html`; the User does not get access to analytics data.
 
-MongoDB Atlas remains a separate managed database service; it does not require its own public application URL. Configure Atlas database-user permissions and network access before launch. The dashboard and analytics read APIs require an Admin or User login. Admin credentials are configured in environment variables; public User signup creates only User accounts. Both roles currently have access to all analytics, as requested, so restrict signup/access before using real visitor data.
+MongoDB Atlas remains a separate managed database service; it does not require its own public application URL. Configure Atlas database-user permissions and network access before launch. The dashboard and analytics read APIs require an Admin login. Admin credentials are configured in environment variables; public User signup creates only User accounts. User accounts are redirected to the tracked HTML demo and cannot read analytics APIs. Event writes remain public so tracked pages can send events.
+
+## How to demonstrate event tracking and MongoDB
+
+1. Sign in at `/` as **Admin**. Keep this browser tab for the dashboard.
+2. Open `/demo.html` in another tab. Visit the page and click several links/buttons or page areas. The tracking script automatically sends `page_view` and `click` events to `POST /api/events`.
+3. In the browser, open Developer Tools (**F12**) → **Network**, filter by `events`, then reload the demo and click. Select the `POST /api/events` request. A successful request returns HTTP `201` and JSON similar to `{"stored":1}` (the exact number can vary).
+4. In the same browser where you signed in as Admin, open `/api/db-status`. It should return JSON showing `"connected":true`, `"collection":"events"`, and an `eventCount` greater than zero once events have been collected. If it returns an authentication error, sign in as Admin again first.
+5. To show the stored records visually, open MongoDB Atlas → your cluster → **Browse Collections**. Choose the database named in your `MONGO_URI`, then open the `events` collection. Show fields such as `session_id`, `type`, `url`, `timestamp`, and (for clicks) `x` and `y`. Do not show or share the MongoDB connection string or database password.
+6. Return to the Admin dashboard at `/`. **Sessions** shows grouped sessions and event counts; select a session to show its ordered **User journey**. **Click heatmap** visualizes stored click coordinates. These views use backend read APIs, not hard-coded sample data.
+7. For the screen recording or interview demo, show the flow in this order: tracked HTML page → Network `POST /api/events` response → Atlas `events` collection → Admin dashboard results.
+
+Troubleshooting: `/health` only confirms that the API process responds; use the Admin-only `/api/db-status` endpoint and Atlas `events` collection to verify event data is reaching MongoDB.
 
 ## Assumptions and trade-offs
 - **Sessions:** a UUID in localStorage, renewed after 30 minutes of inactivity. It is not shared across subdomains.
@@ -88,5 +101,5 @@ MongoDB Atlas remains a separate managed database service; it does not require i
 - **Heatmap background:** the page is shown in an iframe, so it must allow framing (no `X-Frame-Options: DENY`). Untick "Show page behind" to see the heat only.
 - **Sessions are aggregated live** with `$group`. At large scale, precompute a sessions collection.
 - **Events are sent one at a time** with `keepalive` so they survive navigation. Batching would reduce requests.
-- Dashboard analytics reads require a signed HttpOnly session cookie for either the Admin or User role. User registration is public and creates only User accounts; it cannot create Admin accounts. Both roles can read all analytics in this assignment version. Event writes remain public so tracked pages can send events, and are rate limited and size capped.
+- Dashboard analytics reads require a signed HttpOnly session cookie with the Admin role. User registration is public and creates only User accounts; after sign-in, Users are sent to the tracked demo and analytics reads return 403 for them. Event writes remain public so tracked pages can send events, and are rate limited and size capped.
 - **Client timestamps** are used for ordering. The server time is stored as `receivedAt`.
