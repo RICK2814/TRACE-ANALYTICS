@@ -128,7 +128,7 @@ export default function App() {
     || workspaces[0]
     || null;
   const activeWorkspaceInitials = activeWorkspace
-    ? activeWorkspace.name.split(/\\s+/).map((part) => part[0] || "").join("").slice(0, 2).toUpperCase()
+    ? activeWorkspace.name.split(/\s+/).map((part) => part[0] || "").join("").slice(0, 2).toUpperCase()
     : "TW";
 
   function selectWorkspace(workspace) {
@@ -153,7 +153,7 @@ export default function App() {
 
   async function handleCreateWorkspace(event) {
     event.preventDefault();
-    const name = newWorkspaceName.trim().replace(/\\s+/g, " ");
+    const name = newWorkspaceName.trim().replace(/\s+/g, " ");
     if (name.length < 2 || name.length > 60) {
       setWorkspaceError("Workspace name must be 2–60 characters.");
       return;
