@@ -80,7 +80,7 @@ This repo uses Vercel Services so the dashboard, API, and tracked demo pages sha
 4. Deploy. Vercel routes `/api/*` and `/health` to Express and other paths to the Vite dashboard/static assets.
 5. Verify `/health` (expected response: `{"ok":true}`). Visit `/` to choose Admin or User. Admin uses the configured environment credentials; User can create an account and sign in. Both roles can view analytics as requested. The public `/demo.html` records visits/clicks; return to the admin dashboard to inspect Sessions and Click heatmap. Add events by clicking the demo from another browser/device.
 
-MongoDB Atlas remains a separate managed database service; it does not require its own public application URL. Configure Atlas database-user permissions and network access before launch. This prototype does not implement dashboard authentication, so don't expose real customer analytics until access control, privacy notices, and retention rules are added.
+MongoDB Atlas remains a separate managed database service; it does not require its own public application URL. Configure Atlas database-user permissions and network access before launch. The dashboard and analytics read APIs require an Admin or User login. Admin credentials are configured in environment variables; public User signup creates only User accounts. Both roles currently have access to all analytics, as requested, so restrict signup/access before using real visitor data.
 
 ## Assumptions and trade-offs
 - **Sessions:** a UUID in localStorage, renewed after 30 minutes of inactivity. It is not shared across subdomains.
@@ -88,5 +88,5 @@ MongoDB Atlas remains a separate managed database service; it does not require i
 - **Heatmap background:** the page is shown in an iframe, so it must allow framing (no `X-Frame-Options: DENY`). Untick "Show page behind" to see the heat only.
 - **Sessions are aggregated live** with `$group`. At large scale, precompute a sessions collection.
 - **Events are sent one at a time** with `keepalive` so they survive navigation. Batching would reduce requests.
-- **No authentication** on the dashboard or API reads, since this is a prototype. Event writes are rate limited and size capped.
+- Dashboard analytics reads require a signed HttpOnly session cookie for either the Admin or User role. User registration is public and creates only User accounts; it cannot create Admin accounts. Both roles can read all analytics in this assignment version. Event writes remain public so tracked pages can send events, and are rate limited and size capped.
 - **Client timestamps** are used for ordering. The server time is stored as `receivedAt`.
