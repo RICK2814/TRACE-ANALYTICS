@@ -2,7 +2,7 @@
 
 **A full-stack website interaction analytics application** built for the Full Stack Engineer assignment: capture browser activity, persist events in MongoDB, and explore sessions, user journeys, and click heatmaps in an admin dashboard.
 
-[GitHub Repository](https://github.com/RICK2814/TRACE-ANALYTICS) · [Hosted Application](https://trace-analytics-one.vercel.app/)
+[GitHub Repository](https://github.com/RICK2814/TRACE-ANALYTICS) · [Live HTML Website](https://trace-analytics-one.vercel.app/demo.html)
 
 > **Deployment note:** GitHub `main` is the source of truth. The hosted URL is an existing deployment and may not include the newest source changes until a deployment of the latest `main` revision completes.
 
@@ -299,7 +299,7 @@ In a second terminal, return to the repository root and start a static server:
 npx serve tracker -l 3000
 ```
 
-Open [http://localhost:3000/demo.html](http://localhost:3000/demo.html). Visit the product collection and checkout pages, click links or buttons, and add/remove products to generate activity.
+Open the local static-server URL printed in your terminal and append `/demo.html`. Visit the product collection and checkout pages, click links or buttons, and add/remove products to generate activity. This local URL is only for development; use the **Live HTML Website** link at the top to open the hosted storefront.
 
 ### 4. Configure and run the React dashboard
 
