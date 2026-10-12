@@ -16,6 +16,7 @@ const eventSchema = new mongoose.Schema({
   page_w: Number,                                  // document width at click time
   page_h: Number,                                  // document height at click time
   user_agent: String,
+  workspace_id: { type: String, index: true },
   role: { type: String, enum: ["admin", "user", "guest"], default: "guest" },
   username: { type: String, maxlength: 32 },
   cart_items: { type: [cartItemSchema], default: undefined },
