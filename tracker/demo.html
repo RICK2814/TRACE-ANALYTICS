@@ -8,6 +8,10 @@
   body { margin:0; font-family: system-ui, sans-serif; color:#1d2b24; background:#f4f7f3; }
   header { padding:20px 40px; background:#1d3b2f; color:#fff; display:flex; justify-content:space-between; align-items:center; }
   nav a { color:#cfe6d8; margin-left:20px; text-decoration:none; }
+  nav button { color:#cfe6d8; margin-left:20px; background:transparent; border:0; padding:0; font:inherit; cursor:pointer; }
+  nav button:hover { color:#fff; }
+  nav button:disabled { opacity:.7; cursor:wait; }
+  nav button[hidden] { display:none; }
   .hero { padding:80px 40px; max-width:900px; margin:auto; }
   .hero h1 { font-size:44px; margin:0 0 12px; }
   button, .btn { background:#e07a2f; color:#fff; border:0; padding:14px 26px; border-radius:6px; font-size:16px; cursor:pointer; text-decoration:none; display:inline-block; }
@@ -18,7 +22,7 @@
 </style>
 </head>
 <body>
-<header><strong>Trail Co.</strong><nav><a href="#">Shop</a><a href="#">Guides</a><a href="#">Contact</a></nav></header>
+<header><strong>Trail Co.</strong><nav><a href="#">Shop</a><a href="#">Guides</a><a href="#">Contact</a><button id="trace-signout" type="button" hidden>Sign out</button></nav></header>
 <div class="hero">
   <h1>Trail Co. Home</h1>
   <p>Click around and scroll. Every click is recorded for the dashboard.</p>
@@ -28,5 +32,6 @@
 <section><h2>Why us</h2><p>Lightweight gear tested on real trails.</p><button>Read reviews</button></section>
 <footer>Subscribe: <button>Join newsletter</button></footer>
 <script src="/tracker.js"></script>
+ <script src="/session-ui.js"></script>
 </body>
 </html>
