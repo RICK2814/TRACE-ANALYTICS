@@ -1,5 +1,11 @@
 const mongoose = require("mongoose");
 
+const cartItemSchema = new mongoose.Schema({
+  name: { type: String, maxlength: 120 },
+  price: Number,
+  quantity: Number,
+}, { _id: false });
+
 const eventSchema = new mongoose.Schema({
   session_id: { type: String, required: true },
   type: { type: String, enum: ["page_view", "click", "cart_snapshot"], required: true },
@@ -12,7 +18,7 @@ const eventSchema = new mongoose.Schema({
   user_agent: String,
   role: { type: String, enum: ["admin", "user", "guest"], default: "guest" },
   username: { type: String, maxlength: 32 },
-  cart_items: [{ _id: false, name: { type: String, maxlength: 120 }, price: Number, quantity: Number }],
+  cart_items: { type: [cartItemSchema], default: undefined },
   cart_total: Number,
   cart_stage: { type: String, enum: ["viewed", "updated", "empty", "order_submitted"] },
   receivedAt: { type: Date, default: Date.now },   // server time
