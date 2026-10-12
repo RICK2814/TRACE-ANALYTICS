@@ -58,6 +58,7 @@ export default function App() {
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [workspaceBusy, setWorkspaceBusy] = useState(false);
   const [workspaceError, setWorkspaceError] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
   const isSessions = tab === "sessions";
   const isLocalEnvironment = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
@@ -136,6 +137,18 @@ export default function App() {
     setWorkspaceMenuOpen(false);
     setShowWorkspaceForm(false);
     setWorkspaceError("");
+  }
+
+  async function copyWorkspaceLink() {
+    const url = new URL("/demo.html", window.location.origin);
+    url.searchParams.set("workspace", activeWorkspaceId || "default");
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 2200);
+    } catch {
+      setWorkspaceError("Could not copy automatically. Open the demo link and copy it from your browser address bar.");
+    }
   }
 
   async function handleCreateWorkspace(event) {
@@ -371,6 +384,9 @@ export default function App() {
                 ))}
                 {!workspaces.length && <p className="workspace-menu-empty">No workspaces loaded yet.</p>}
               </div>
+              <button type="button" className="workspace-copy-link" onClick={copyWorkspaceLink}>
+                <span aria-hidden="true">↗</span> {linkCopied ? "Workspace link copied" : "Copy tracking link"}
+              </button>
               <button
                 type="button"
                 className="workspace-create-trigger"
