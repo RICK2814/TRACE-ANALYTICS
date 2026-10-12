@@ -49,6 +49,15 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(() => {
+    try { return localStorage.getItem("traceAnalyticsActiveWorkspace") || ""; } catch { return ""; }
+  });
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
+  const [showWorkspaceForm, setShowWorkspaceForm] = useState(false);
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [workspaceBusy, setWorkspaceBusy] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState("");
   const isSessions = tab === "sessions";
   const isLocalEnvironment = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
@@ -83,6 +92,80 @@ export default function App() {
       });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    let active = true;
+    fetch(`${API}/workspaces`, { credentials: "include", cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Could not load workspaces.");
+        return Array.isArray(data) ? data : [];
+      })
+      .then((items) => {
+        if (!active) return;
+        setWorkspaces(items);
+        setWorkspaceError("");
+        let savedId = "";
+        try { savedId = localStorage.getItem("traceAnalyticsActiveWorkspace") || ""; } catch {}
+        const selected = items.find((item) => item.id === savedId)
+          || items.find((item) => item.is_default)
+          || items[0];
+        if (selected) {
+          setActiveWorkspaceId(selected.id);
+          try { localStorage.setItem("traceAnalyticsActiveWorkspace", selected.id); } catch {}
+        }
+      })
+      .catch((error) => {
+        if (active) setWorkspaceError(error.message || "Could not load workspaces.");
+      });
+    return () => { active = false; };
+  }, [authStatus]);
+
+  const activeWorkspace = workspaces.find((workspace) => workspace.id === activeWorkspaceId)
+    || workspaces.find((workspace) => workspace.is_default)
+    || workspaces[0]
+    || null;
+  const activeWorkspaceInitials = activeWorkspace
+    ? activeWorkspace.name.split(/\\s+/).map((part) => part[0] || "").join("").slice(0, 2).toUpperCase()
+    : "TW";
+
+  function selectWorkspace(workspace) {
+    setActiveWorkspaceId(workspace.id);
+    try { localStorage.setItem("traceAnalyticsActiveWorkspace", workspace.id); } catch {}
+    setWorkspaceMenuOpen(false);
+    setShowWorkspaceForm(false);
+    setWorkspaceError("");
+  }
+
+  async function handleCreateWorkspace(event) {
+    event.preventDefault();
+    const name = newWorkspaceName.trim().replace(/\\s+/g, " ");
+    if (name.length < 2 || name.length > 60) {
+      setWorkspaceError("Workspace name must be 2–60 characters.");
+      return;
+    }
+    setWorkspaceBusy(true);
+    setWorkspaceError("");
+    try {
+      const response = await fetch(`${API}/workspaces`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not create workspace.");
+      setWorkspaces((current) => [...current.filter((workspace) => workspace.id !== data.id), data]);
+      setNewWorkspaceName("");
+      setShowWorkspaceForm(false);
+      selectWorkspace(data);
+    } catch (error) {
+      setWorkspaceError(error.message || "Could not create workspace.");
+    } finally {
+      setWorkspaceBusy(false);
+    }
+  }
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -249,13 +332,73 @@ export default function App() {
           </div>
         </div>
 
-        <div className="workspace-card">
-          <div className="workspace-avatar">LD</div>
-          <div className="workspace-copy">
-            <small>WORKSPACE</small>
-            <strong>{isLocalEnvironment ? "Local development" : "Trace workspace"}</strong>
-          </div>
-          <span className="workspace-chevron"><Icon name="chevron" size={14} /></span>
+        <div className="workspace-switcher">
+          <button
+            className="workspace-card"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded={workspaceMenuOpen}
+            onClick={() => setWorkspaceMenuOpen((open) => !open)}
+          >
+            <span className="workspace-avatar">{activeWorkspaceInitials}</span>
+            <span className="workspace-copy">
+              <small>WORKSPACE · {workspaces.length || "…"}</small>
+              <strong>{activeWorkspace?.name || (isLocalEnvironment ? "Local development" : "Loading workspaces…")}</strong>
+            </span>
+            <span className="workspace-chevron"><Icon name="chevron" size={14} /></span>
+          </button>
+          {workspaceMenuOpen && (
+            <div className="workspace-menu">
+              <div className="workspace-menu-heading">
+                <strong>Your workspaces</strong>
+                <span>{workspaces.length}</span>
+              </div>
+              <div className="workspace-menu-list">
+                {workspaces.map((workspace) => (
+                  <button
+                    type="button"
+                    key={workspace.id}
+                    className={`workspace-option ${workspace.id === activeWorkspaceId ? "active" : ""}`}
+                    onClick={() => selectWorkspace(workspace)}
+                  >
+                    <span className="workspace-option-avatar">{workspace.name.slice(0, 1).toUpperCase()}</span>
+                    <span className="workspace-option-copy">
+                      <strong>{workspace.name}</strong>
+                      <small>{workspace.is_default ? "Default workspace" : "Workspace"}</small>
+                    </span>
+                    {workspace.id === activeWorkspaceId && <span className="workspace-check">✓</span>}
+                  </button>
+                ))}
+                {!workspaces.length && <p className="workspace-menu-empty">No workspaces loaded yet.</p>}
+              </div>
+              <button
+                type="button"
+                className="workspace-create-trigger"
+                onClick={() => { setShowWorkspaceForm((open) => !open); setWorkspaceError(""); }}
+              >
+                <span aria-hidden="true">＋</span> {showWorkspaceForm ? "Cancel create" : "Create workspace"}
+              </button>
+              {showWorkspaceForm && (
+                <form className="workspace-create-form" onSubmit={handleCreateWorkspace}>
+                  <label htmlFor="new-workspace-name">WORKSPACE NAME</label>
+                  <input
+                    id="new-workspace-name"
+                    value={newWorkspaceName}
+                    onChange={(event) => setNewWorkspaceName(event.target.value)}
+                    placeholder="e.g. Marketing website"
+                    minLength={2}
+                    maxLength={60}
+                    autoFocus
+                    required
+                  />
+                  <button type="submit" disabled={workspaceBusy}>
+                    {workspaceBusy ? "Creating…" : "Create workspace"}
+                  </button>
+                </form>
+              )}
+              {workspaceError && <p className="error workspace-error" role="alert">{workspaceError}</p>}
+            </div>
+          )}
         </div>
 
         <div className="sidebar-section-label">ANALYTICS</div>
@@ -298,7 +441,7 @@ export default function App() {
       <div className="main-column">
         <header className="utility-bar">
           <div className="breadcrumbs">
-            <span>Workspace</span>
+            <span>{activeWorkspace?.name || "Workspace"}</span>
             <Icon name="chevron" size={13} />
             <strong>Analytics</strong>
           </div>
@@ -318,7 +461,7 @@ export default function App() {
               <p>Review session activity and see where people interact with your pages.</p>
             </div>
             <div className="page-intro-actions">
-              <a className="ghost demo-launch" href="/demo.html" target="_blank" rel="noreferrer">
+              <a className="ghost demo-launch" href={`/demo.html?workspace=${encodeURIComponent(activeWorkspaceId || "default")}`} target="_blank" rel="noreferrer">
                 <span>Open tracked demo</span>
                 <span aria-hidden="true">↗</span>
               </a>
@@ -338,7 +481,7 @@ export default function App() {
           </section>
 
           <section className="view-content">
-            {isSessions ? <Sessions /> : <Heatmap />}
+            {isSessions ? <Sessions key={activeWorkspaceId || "default"} /> : <Heatmap key={activeWorkspaceId || "default"} />}
           </section>
 
           <footer className="page-footer">
