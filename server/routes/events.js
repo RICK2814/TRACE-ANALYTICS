@@ -22,12 +22,6 @@ function heatmapPageKey(raw) {
   }
 }
 
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\const router = express.Router();
-const TYPES = ["page_view", "click"];
-const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : undefined);");
-}
-
 function clean(e, ua) {
   if (!e || typeof e !== "object") return null;
   if (!e.session_id || !TYPES.includes(e.type) || !e.url) return null;
@@ -152,7 +146,7 @@ router.get("/heatmap", requireAdmin, async (req, res, next) => {
 
     if (targetKey.startsWith("/")) {
       const aliasPattern = new RegExp(
-        "^https?://trace-analytics[^/]*\\.vercel\\.app" + escapeRegex(targetKey) + "$",
+        "^https?://trace-analytics[^/]*\\.vercel\\.app" + targetKey.replace(/\./g, "\\\\.") + "$",
         "i"
       );
       filter = { type: "click", url: { $regex: aliasPattern } };
