@@ -114,3 +114,41 @@ main{overflow:clip}.hero{display:grid;grid-template-columns:minmax(330px,.86fr) 
   .bag-button { gap: 5px; padding-right: 6px; padding-left: 6px; }
   .account-copy small { display: none; }
 }
+
+
+/* Account dropdown: sign-in/sign-out are available inside the account control. */
+.account-menu { position: relative; display: inline-flex; flex: 0 0 auto; }
+.account-trigger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 0; min-height: 40px; padding: 4px 9px 4px 5px;
+  border: 1px solid var(--line); color: var(--ink); background: rgba(255,254,250,.78);
+  text-align: left; cursor: pointer; transition: border-color .18s, background .18s;
+}
+.account-trigger:hover, .account-trigger[aria-expanded="true"] { border-color: var(--forest); background: var(--white); }
+.account-trigger .account-avatar { display: inline-grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%; color: white; background: var(--forest); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.account-trigger .account-copy { display: flex; flex-direction: column; min-width: 0; max-width: 116px; line-height: 1.2; }
+.account-trigger .account-copy strong { display: block; overflow: hidden; color: var(--ink); font-size: 10px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.account-trigger .account-copy small { display: block; margin-top: 3px; color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .12em; }
+.account-chevron { flex: 0 0 13px; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform .18s; }
+.account-trigger[aria-expanded="true"] .account-chevron { transform: rotate(180deg); }
+.account-dropdown { position: absolute; top: calc(100% + 9px); right: 0; z-index: 80; width: min(255px, calc(100vw - 28px)); padding: 10px; border: 1px solid var(--line); background: var(--white); box-shadow: 0 18px 45px rgba(18,30,20,.18); }
+.account-dropdown[hidden] { display: none !important; }
+.account-dropdown-heading { display: grid; gap: 5px; padding: 9px 10px 13px; border-bottom: 1px solid var(--line); }
+.account-dropdown-heading strong { overflow-wrap: anywhere; color: var(--ink); font-size: 12px; }
+.account-dropdown-heading small { color: var(--muted); font-size: 10px; }
+.account-menu-action { display: flex; align-items: center; width: 100%; min-height: 38px; margin-top: 7px; padding: 9px 10px; border: 1px solid transparent; color: var(--forest); background: #eef0e7; font-size: 11px; font-weight: 800; text-align: left; text-decoration: none; cursor: pointer; }
+.account-menu-action:hover { border-color: #c7d0c0; background: #e4e9dc; }
+.account-menu-action[hidden] { display: none !important; }
+.account-menu-signout { color: #7a3c2d; background: #f5eee9; }
+.account-menu-signout:hover { border-color: #e4c6b8; background: #f1e4db; }
+@media (max-width: 720px) {
+  .account-trigger { min-height: 35px; gap: 5px; padding: 3px 6px 3px 3px; }
+  .account-trigger .account-avatar { flex-basis: 27px; width: 27px; height: 27px; }
+  .account-trigger .account-copy { max-width: 78px; }
+}
+@media (max-width: 420px) {
+  .account-trigger { gap: 4px; padding-right: 4px; }
+  .account-trigger .account-copy { max-width: 54px; }
+  .account-trigger .account-copy small { display: none; }
+  .account-chevron { flex-basis: 10px; width: 10px; height: 10px; }
+}

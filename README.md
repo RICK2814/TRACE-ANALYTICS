@@ -124,3 +124,9 @@ Troubleshooting: `/health` only confirms that the API process responds; use the 
 - The Admin heatmap page list includes any URL that has a tracked page view, even before that URL has click events. The selector shows the URL path, click count, and page-view count.
 - The page list refreshes automatically while Heatmap is open and can also be refreshed with **Refresh pages**. Use **Open selected page** to open the selected route, click around, then refresh the selector.
 - `/checkout.html` is tracked by the same `/tracker.js`; once visits and clicks have reached the Events collection, choose `/checkout.html` from the page selector. If its recorded click count is zero, the map will explain that more interactions must be collected first.
+
+### Shared activity and account dropdown
+
+- The Heatmap combines events from the production and preview hostnames of this TRACE Analytics Vercel app by URL pathname. This makes User and Admin browsing visible together when they visited the same app through different Vercel aliases.
+- User/Admin page account controls use a dropdown: select the account button to see Sign in when logged out, or Sign out when authenticated. The standalone Sign out button has been removed from the storefront header.
+- The backend continues to accept tracker events without a login cookie; only analytics read endpoints require Admin authentication.

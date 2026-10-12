@@ -7,7 +7,7 @@
 <meta name="description" content="Review your Trail Co. pack and try the demo checkout flow.">
 <title>Checkout — Trail Co.</title>
 <link rel="preconnect" href="https://images.unsplash.com">
-<link rel="stylesheet" href="/site.css?v=20261012-demo-checkout">
+<link rel="stylesheet" href="/site.css?v=20261012-account-dropdown-events">
 <style>
 .checkout-page [hidden] { display: none !important; }
 .checkout-page { --checkout-ink:#202b24; --checkout-muted:#73786f; --checkout-line:#dedfd6; --checkout-card:#fffefa; }
@@ -141,26 +141,20 @@
   <a class="brand" href="/demo.html" aria-label="Trail Co. home"><span class="brand-stamp">t.</span><span class="brand-word">TRAIL CO.<small>GOODS FOR OUT THERE</small></span></a>
   <nav class="site-nav" id="main-nav" aria-label="Main navigation">
     <a href="/demo.html">Home</a><a href="/demo2.html#shop">Shop all</a><a href="/demo.html#journal">Field notes</a>
-    <a class="signin-link" id="trace-signin" href="/">Sign in</a>
-    <button class="signout-button" id="trace-signout" type="button" hidden>Sign out ↗</button>
   </nav>
   <div class="header-actions">
-    <div class="account-pill" id="trace-account" hidden aria-label="Signed-in account"><span class="account-avatar" id="trace-account-avatar">U</span><span class="account-copy"><strong id="trace-account-name">Account</strong><small id="trace-account-role">USER</small></span></div>
-    <a class="bag-button" href="#order-summary">Your pack <span class="bag-count" data-cart-count>0</span></a>
-    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">Menu +</button>
+    <div class="account-menu" id="trace-account-menu">
+  <button class="account-trigger" id="trace-account-trigger" type="button" aria-expanded="false" aria-controls="trace-account-dropdown" aria-label="Open account menu">
+    <span class="account-avatar" id="trace-account-avatar">A</span>
+    <span class="account-copy"><strong id="trace-account-name">Account</strong><small id="trace-account-role">GUEST</small></span>
+    <svg class="account-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+  </button>
+  <div class="account-dropdown" id="trace-account-dropdown" hidden>
+    <div class="account-dropdown-heading"><strong id="trace-account-menu-title">Welcome</strong><small id="trace-account-menu-description">You are not signed in.</small></div>
+    <a class="account-menu-action" id="trace-signin" href="/">Sign in to TRACE</a>
+    <button class="account-menu-action account-menu-signout" id="trace-signout" type="button" hidden>Sign out ↗</button>
   </div>
-</header>
-
-<main class="checkout-shell">
-  <div class="checkout-intro">
-    <div><p class="checkout-kicker">Almost out the door</p><h1>Your pack,<br>ready to go.</h1></div>
-    <p>Review your kit, add delivery details and choose how you would pay. This is a demo checkout, so you can test the flow without making a real payment.</p>
-  </div>
-  <div class="checkout-steps" aria-label="Checkout steps">
-    <div class="checkout-step active"><span>1</span> Your pack</div><i class="checkout-step-separator"></i>
-    <div class="checkout-step active"><span>2</span> Delivery</div><i class="checkout-step-separator"></i>
-    <div class="checkout-step active"><span>3</span> Payment</div>
-  </div>
+</div>
 
   <div class="checkout-layout" id="checkout-layout">
     <div class="checkout-primary">
@@ -230,7 +224,7 @@
 <footer class="checkout-footer"><span>© 2026 Trail Co. · Goods for out there.</span><span>Demo experience only · <a href="/demo.html">Back to the store</a></span></footer>
 
 <script src="/tracker.js" data-api="/api/events"></script>
-<script src="/session-ui.js?v=20261012-checkout"></script>
+<script src="/session-ui.js?v=20261012-account-dropdown-events"></script>
 <script>
 (function () {
   "use strict";
