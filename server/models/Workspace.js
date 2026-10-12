@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const workspaceSchema = new mongoose.Schema({
-  workspace_key: { type: String, required: true, unique: true, index: true },
+  workspace_key: { type: String, required: true, unique: true },
   name: { type: String, required: true, trim: true, maxlength: 60 },
   name_key: { type: String, required: true },
   created_by: { type: String, required: true },
