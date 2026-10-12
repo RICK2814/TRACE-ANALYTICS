@@ -11,7 +11,7 @@ const {
 
 const router = express.Router();
 const scrypt = promisify(crypto.scrypt);
-const usernamePattern = /^[a-zA-Z0-9_.-]{3,32}$/;
+const usernamePattern = /^[^\\u0000-\\u001F\\u007F-\\u009F]{3,32}$/u;
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -71,7 +71,7 @@ router.post("/register", loginLimiter, async (req, res) => {
   const password = String(req.body?.password || "");
 
   if (!usernamePattern.test(usernameRaw)) {
-    return res.status(400).json({ error: "Username must be 3–32 characters using letters, numbers, dots, underscores or hyphens." });
+    return res.status(400).json({ error: "Username must be 3–32 characters. Special characters such as @, dots, underscores and hyphens are allowed." });
   }
   if (password.length < 8 || password.length > 128) {
     return res.status(400).json({ error: "Password must be at least 8 characters and no more than 128 characters." });

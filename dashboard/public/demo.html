@@ -1,37 +1,48 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trail Co. Home</title>
-<style>
-  body { margin:0; font-family: system-ui, sans-serif; color:#1d2b24; background:#f4f7f3; }
-  header { padding:20px 40px; background:#1d3b2f; color:#fff; display:flex; justify-content:space-between; align-items:center; }
-  nav a { color:#cfe6d8; margin-left:20px; text-decoration:none; }
-  nav button { color:#cfe6d8; margin-left:20px; background:transparent; border:0; padding:0; font:inherit; cursor:pointer; }
-  nav button:hover { color:#fff; }
-  nav button:disabled { opacity:.7; cursor:wait; }
-  nav button[hidden] { display:none; }
-  .hero { padding:80px 40px; max-width:900px; margin:auto; }
-  .hero h1 { font-size:44px; margin:0 0 12px; }
-  button, .btn { background:#e07a2f; color:#fff; border:0; padding:14px 26px; border-radius:6px; font-size:16px; cursor:pointer; text-decoration:none; display:inline-block; }
-  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:900px; margin:0 auto; padding:0 40px; }
-  .card { background:#fff; padding:24px; border-radius:8px; height:140px; }
-  section { max-width:900px; margin:60px auto; padding:0 40px; }
-  footer { background:#1d3b2f; color:#cfe6d8; padding:60px 40px; margin-top:600px; }
-</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<meta name="description" content="Trail Co. makes dependable equipment for unhurried days outside.">
+<title>Trail Co. — Gear for the long way round</title><link rel="preconnect" href="https://images.unsplash.com"><link rel="stylesheet" href="/site.css">
 </head>
 <body>
-<header><strong>Trail Co.</strong><nav><a href="#">Shop</a><a href="#">Guides</a><a href="#">Contact</a><button id="trace-signout" type="button" hidden>Sign out</button></nav></header>
-<div class="hero">
-  <h1>Trail Co. Home</h1>
-  <p>Click around and scroll. Every click is recorded for the dashboard.</p>
-  <button>Start shopping</button> <a class="btn" style="background:#2f6f55" href="demo2.html">See the gear list</a>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="announcement"><strong>Field note no. 04</strong><span>Complimentary shipping on orders over $75</span><a href="/demo2.html#field-notes">Read the journal ↗</a></div>
+<header class="site-header">
+<a class="brand" href="/demo.html" aria-label="Trail Co. home"><span class="brand-stamp">t.</span><span class="brand-word">TRAIL CO.<small>GOODS FOR OUT THERE</small></span></a>
+<nav class="site-nav" id="main-nav" aria-label="Main navigation"><a href="#shop">Shop</a><a href="#categories">Collections</a><a href="/demo2.html#field-notes">Field notes</a><a href="#our-way">Our way</a></nav>
+<div class="header-actions"><button class="bag-button" type="button" data-open-bag>Pack <span class="bag-count" data-cart-count>0</span></button><button class="signout-button" id="trace-signout" type="button" hidden>Sign out ↗</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">Menu +</button></div>
+</header>
+<main id="main">
+<section class="hero">
+<div class="hero-copy"><p class="eyebrow">Equipment for the outside</p><h1>The long way<br>feels <em>right.</em></h1><p>Good gear won't make the miles for you. It will make them a little easier. Trail Co. builds dependable essentials for early starts, weather turns and the unplanned extra mile.</p><div class="actions-row"><a class="button-primary" href="#shop">Shop the essentials <span class="arrow">↗</span></a><a class="button-secondary" href="/demo2.html">Explore the field kit</a></div><div class="hero-notes"><span>Made to be used</span><span>Repair over replace</span><span>Outside, often</span></div></div>
+<div class="hero-visual"><img class="hero-image" src="https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=1500&q=85" alt="Hikers making their way along a mountain trail" fetchpriority="high"><div class="image-index">04</div><div class="image-stamp">Somewhere beyond the trailhead · 47° N</div><div class="hero-visual-caption"><strong>Notes from the trail</strong>Leave the plan loose. Bring one more layer than you think you need.</div></div>
+</section>
+<section class="principles" id="our-way" aria-label="What matters to us">
+<div class="principle"><span class="principle-number">01</span><div><strong>Less, but better</strong><p>Useful details. Nothing to prove.</p></div></div>
+<div class="principle"><span class="principle-number">02</span><div><strong>Tested in real weather</strong><p>Built for rain, dust and long days.</p></div></div>
+<div class="principle"><span class="principle-number">03</span><div><strong>Keep it going</strong><p>Care for your kit and it lasts longer.</p></div></div>
+</section>
+<section class="content-section" id="shop">
+<div class="section-heading"><div><p class="section-kicker">The considered kit</p><h2>Good things to<br>take with you.</h2></div><div><p>Hard-working staples, chosen for the way they feel in use—not just the way they look on a shelf.</p><a class="text-link" href="/demo2.html#field-kit">Shop the full collection <span>↗</span></a></div></div>
+<div class="product-grid">
+<article class="product-card" data-category="packs"><div class="product-picture"><img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80" alt="A durable outdoor backpack" loading="lazy"><span class="product-badge">Best seller</span></div><div class="product-copy"><div><h3 class="product-name">Ridge 32L Pack</h3><p class="product-desc">A day out, neatly packed.</p></div><span class="product-price">$128</span></div><div class="product-actions"><button class="add-button" type="button" data-add>Add to pack +</button><span class="product-material">Recycled nylon</span></div></article>
+<article class="product-card" data-category="camp"><div class="product-picture"><img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=800&q=80" alt="A warm drink ready at camp" loading="lazy"><span class="product-badge">Field tested</span></div><div class="product-copy"><div><h3 class="product-name">Camp Cup</h3><p class="product-desc">For the first brew outside.</p></div><span class="product-price">$24</span></div><div class="product-actions"><button class="add-button" type="button" data-add>Add to pack +</button><span class="product-material">Enamelled steel</span></div></article>
+<article class="product-card" data-category="apparel"><div class="product-picture"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80" alt="A simple everyday cotton layer" loading="lazy"></div><div class="product-copy"><div><h3 class="product-name">Trailweight Tee</h3><p class="product-desc">Soft, simple, ready to roam.</p></div><span class="product-price">$38</span></div><div class="product-actions"><button class="add-button" type="button" data-add>Add to pack +</button><span class="product-material">Organic cotton</span></div></article>
+<article class="product-card" data-category="camp"><div class="product-picture"><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80" alt="A quiet campsite landscape at golden hour" loading="lazy"><span class="product-badge">Small essential</span></div><div class="product-copy"><div><h3 class="product-name">Low Tide Lantern</h3><p class="product-desc">A little light after sundown.</p></div><span class="product-price">$46</span></div><div class="product-actions"><button class="add-button" type="button" data-add>Add to pack +</button><span class="product-material">Rechargeable</span></div></article>
 </div>
-<div class="grid"><div class="card">Tents</div><div class="card">Boots</div><div class="card">Packs</div></div>
-<section><h2>Why us</h2><p>Lightweight gear tested on real trails.</p><button>Read reviews</button></section>
-<footer>Subscribe: <button>Join newsletter</button></footer>
-<script src="/tracker.js" data-api="/api/events"></script>
- <script src="/session-ui.js"></script>
-</body>
-</html>
+</section>
+<section class="content-section" id="categories">
+<div class="section-heading"><div><p class="section-kicker">Start where you are</p><h2>Find your kind<br>of outside.</h2></div><p>From a quick walk before dinner to a long weekend with nowhere to be.</p></div>
+<div class="category-grid">
+<a class="category-card" href="/demo2.html#field-kit"><img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=900&q=80" alt="A lake and mountains at first light" loading="lazy"><div class="category-card-copy"><div><span>Carry well</span><strong>Packs & bags</strong></div><em>↗</em></div></a>
+<a class="category-card" href="/demo2.html#field-kit"><img src="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=900&q=80" alt="A quiet forest path" loading="lazy"><div class="category-card-copy"><div><span>Layers for the change</span><strong>Clothing</strong></div><em>↗</em></div></a>
+<a class="category-card" href="/demo2.html#field-kit"><img src="https://images.unsplash.com/photo-1522163182402-834f871fd851?auto=format&fit=crop&w=900&q=80" alt="A climber making progress on a rock face" loading="lazy"><div class="category-card-copy"><div><span>Go a little farther</span><strong>Trail essentials</strong></div><em>↗</em></div></a>
+</div></section>
+<section class="story-band" id="field-notes"><div class="story-image"><img src="https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1300&q=85" alt="Wild landscape with deer between trees" loading="lazy"></div><div class="story-copy"><p class="section-kicker">Field note no. 04 · Slow mornings</p><h2>A few miles past the last signal.</h2><p>There is a point on most walks when the messages stop mattering. We make gear for the time it takes to get there—and the quiet that comes after.</p><a class="button-primary" href="/demo2.html#field-notes">Read the field notes <span class="arrow">↗</span></a><div class="story-meta">Written outside · 6 minute read</div></div></section>
+<section class="newsletter" id="newsletter"><div><p class="section-kicker">A note now and then</p><h2>Good stories.<br>No noise.</h2><p>New kit, trail notes and little reasons to get outside. Sent only when we have something worth sharing.</p></div><div><form class="newsletter-form" data-newsletter><input type="email" name="email" placeholder="Your email address" aria-label="Your email address" required><button type="submit">Count me in <span>↗</span></button></form><p class="form-message" aria-live="polite"></p></div></section>
+</main>
+<footer class="site-footer"><div class="footer-brand"><strong>TRAIL CO.</strong><p>Dependable equipment for unhurried days outside. See you out there.</p></div><div class="footer-column"><strong>Explore</strong><a href="#shop">Shop essentials</a><a href="/demo2.html#field-kit">The field kit</a><a href="#field-notes">Field notes</a></div><div class="footer-column"><strong>Keep in touch</strong><a href="#newsletter">The occasional note</a><a href="#our-way">Our approach</a><a href="/demo2.html">Gear guide ↗</a></div></footer>
+<div class="footer-bottom"><span>© 2026 Trail Co. Built for use, not display.</span><span>Every useful detail has a reason.</span></div><div class="toast" role="status" aria-live="polite"></div>
+<script src="/tracker.js"></script><script src="/site.js"></script><script src="/session-ui.js"></script>
+</body></html>

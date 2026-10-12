@@ -46,6 +46,7 @@ export default function App() {
   const [loginMode, setLoginMode] = useState("login");
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
   const isSessions = tab === "sessions";
@@ -192,11 +193,22 @@ export default function App() {
           <form className="auth-form" onSubmit={loginMode === "register" ? handleRegister : handleLogin}>
             <label>
               <span>Username</span>
-              <input value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} name="username" autoComplete="username" minLength={3} maxLength={32} required />
+              <input value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="e.g. Rick@_2814" minLength={3} maxLength={32} required />
+              <small className="auth-field-hint">3–32 characters. Special characters such as @ are allowed.</small>
             </label>
             <label>
               <span>Password</span>
-              <input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} name="password" type="password" autoComplete={loginMode === "register" ? "new-password" : "current-password"} minLength={loginMode === "register" ? 8 : undefined} required />
+              <div className="password-field">
+                <input className="password-input" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} name="password" type={showPassword ? "text" : "password"} autoComplete={loginMode === "register" ? "new-password" : "current-password"} minLength={loginMode === "register" ? 8 : undefined} required />
+                <button className="password-toggle" type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.2 0 9.5 7 9.5 7a15 15 0 0 1-3.1 3.8M6.2 6.3C3.8 8 2.5 12 2.5 12s3.3 7 9.5 7c1.4 0 2.6-.3 3.7-.9" /></svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.3-7 9.5-7 9.5 7 9.5 7-3.3 7-9.5 7-9.5-7-9.5-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+                  )}
+                </button>
+              </div>
+              <small className="auth-field-hint">Minimum 8 characters. Use the eye icon to show or hide it.</small>
             </label>
             <button className="auth-submit" type="submit" disabled={loginBusy || !secretConfigured || (loginRole === "admin" && !adminConfigured)}>
               {loginBusy ? "Please wait…" : loginMode === "register" ? "Create user account" : "Sign in as " + loginRole}

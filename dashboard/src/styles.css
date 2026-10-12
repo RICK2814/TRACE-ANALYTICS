@@ -356,3 +356,12 @@ tbody tr:nth-child(5) { animation-delay: .1s; }
 .auth-mode-toggle button { padding: 0; border: 0; color: #b7dfbc; background: transparent; font-size: inherit; font-weight: 700; }
 .auth-mode-toggle button:hover { text-decoration: underline; }
 .auth-role-chip { padding: 5px 7px; border: 1px solid #405a43; border-radius: 5px; color: #c4e4c8; background: #202e22; font-size: 9px; font-weight: 800; letter-spacing: .7px; }
+
+/* Password visibility control for the sign-in form. */
+.auth-field-hint { color: #89968a; font-size: 10px; font-weight: 400; line-height: 1.5; }
+.password-field { position: relative; display: flex; align-items: center; width: 100%; }
+.auth-form .password-field .password-input { padding-right: 46px; }
+.password-toggle { position: absolute; right: 6px; top: 50%; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 6px; color: #9cae9d; background: transparent; transform: translateY(-50%); cursor: pointer; }
+.password-toggle:hover { color: #d6e5d7; background: rgba(196, 218, 196, .08); }
+.password-toggle:focus-visible { outline: 2px solid #a8d2ad; outline-offset: 1px; }
+.password-toggle svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
