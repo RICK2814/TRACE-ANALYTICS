@@ -122,9 +122,15 @@ export default function App() {
               <h1>Understand your visitors.</h1>
               <p>Review session activity and see where people interact with your pages.</p>
             </div>
-            <div className="refresh-note">
-              <span className="refresh-note-dot" />
-              <div><strong>Session data</strong><small>Refreshes every 10 seconds</small></div>
+            <div className="page-intro-actions">
+              <a className="ghost demo-launch" href="/demo.html" target="_blank" rel="noreferrer">
+                <span>Open tracked demo</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <div className="refresh-note">
+                <span className="refresh-note-dot" />
+                <div><strong>Session data</strong><small>Refreshes every 10 seconds</small></div>
+              </div>
             </div>
           </section>
 
