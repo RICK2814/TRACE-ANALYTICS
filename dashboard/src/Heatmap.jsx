@@ -133,6 +133,35 @@ export default function Heatmap() {
   const height = dims.h * scale;
   const selectedPage = pages?.find((page) => page.url === url);
 
+  const previewIdentity = useMemo(() => {
+    const matchesRole = (entry) => roleFilter === "all" || entry.role === roleFilter;
+    const cartIdentity = checkoutActivity.find((entry) => entry.username && matchesRole(entry));
+    const clickIdentity = clicks.find((entry) => entry.username && matchesRole(entry));
+    const userIdentity = roleFilter === "all"
+      ? (clicks.find((entry) => entry.role === "user" && entry.username) ||
+         checkoutActivity.find((entry) => entry.role === "user" && entry.username))
+      : null;
+    const identity = userIdentity || clickIdentity || cartIdentity;
+    const role = identity?.role || (roleFilter === "all" ? "user" : roleFilter);
+    const username = identity?.username ||
+      (role === "admin" ? "Admin name not captured yet" :
+       role === "guest" ? "Guest visitor" : "User name not captured yet");
+    return { username, role };
+  }, [clicks, checkoutActivity, roleFilter]);
+
+  const previewUrl = useMemo(() => {
+    if (!url) return "";
+    try {
+      const parsed = new URL(url, window.location.origin);
+      parsed.searchParams.set("traceHeatmapPreview", "1");
+      parsed.searchParams.set("tracePreviewRole", previewIdentity.role);
+      parsed.searchParams.set("tracePreviewUsername", previewIdentity.username);
+      return parsed.pathname + parsed.search + parsed.hash;
+    } catch {
+      return url;
+    }
+  }, [url, previewIdentity]);
+
   useEffect(() => {
     if (canvasRef.current && clicks.length) paint(canvasRef.current, clicks, width, height);
     else if (canvasRef.current) {
@@ -210,7 +239,7 @@ export default function Heatmap() {
               </div>
               <div className="canvas-wrap" style={{ height }}>
                 {showPage && (
-                  <iframe src={`${url}${url.includes("?") ? "&" : "?"}traceHeatmapPreview=1`} title="Tracked page preview" scrolling="no" tabIndex={-1}
+                  <iframe src={previewUrl} title={`Tracked page preview for ${previewIdentity.username}`} scrolling="no" tabIndex={-1}
                     style={{ width: dims.w, height: dims.h, transform: `scale(${scale})` }} />
                 )}
                 <canvas ref={canvasRef} style={{ width, height }} aria-label="Click density overlay" />
