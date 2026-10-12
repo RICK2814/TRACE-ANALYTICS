@@ -60,9 +60,13 @@ export default function App() {
         if (!active) return;
         setSecretConfigured(data.secretConfigured !== false);
         setAdminConfigured(data.adminConfigured !== false);
-        if (data.authenticated) {
-          setAuthUsername(data.username || "user");
-          setAuthRole(data.role || "user");
+        if (data.authenticated && data.role === "user") {
+          window.location.replace("/demo.html");
+          return;
+        }
+        if (data.authenticated && data.role === "admin") {
+          setAuthUsername(data.username || "admin");
+          setAuthRole("admin");
           setAuthStatus("authenticated");
         } else {
           setAuthStatus("login");
@@ -92,10 +96,15 @@ export default function App() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || `Login failed (${response.status})`);
-      setAuthUsername(data.user?.username || loginUsername);
-      setAuthRole(data.user?.role || loginRole);
+      const authenticatedRole = data.user?.role || loginRole;
       setLoginPassword("");
       setLoginError("");
+      if (authenticatedRole === "user") {
+        window.location.replace("/demo.html");
+        return;
+      }
+      setAuthUsername(data.user?.username || loginUsername);
+      setAuthRole("admin");
       setAuthStatus("authenticated");
       setTab("sessions");
     } catch (error) {
@@ -118,13 +127,10 @@ export default function App() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Registration failed (" + response.status + ")");
-      setAuthUsername(data.user?.username || loginUsername);
-      setAuthRole("user");
-      setLoginRole("user");
       setLoginPassword("");
       setLoginError("");
-      setAuthStatus("authenticated");
-      setTab("sessions");
+      window.location.replace("/demo.html");
+      return;
     } catch (error) {
       setLoginError(error.message || "Could not create user account.");
     } finally {
@@ -171,10 +177,10 @@ export default function App() {
           <h1>{loginRole === "admin" ? "Admin sign in" : loginMode === "register" ? "Create user account" : "User sign in"}</h1>
           <p className="auth-description">
             {loginMode === "register"
-              ? "Create a user account to open the analytics workspace."
+              ? "Create an account to use the tracked demo website. Your page views and clicks will be recorded for the administrator."
               : loginRole === "admin"
                 ? "Administrator access to sessions, visitor journeys and click heatmaps."
-                : "Sign in to the analytics workspace with your user account."}
+                : "Sign in to use the tracked demo website. Your page views and clicks will be recorded for the administrator."}
           </p>
           <div className="auth-role-switch" role="group" aria-label="Account type">
             <button type="button" className={loginRole === "user" ? "selected" : ""} onClick={() => { setLoginRole("user"); setLoginMode("login"); setLoginError(""); }}>User</button>
