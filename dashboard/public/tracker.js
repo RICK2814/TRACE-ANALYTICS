@@ -8,6 +8,16 @@
   var API = configuredAPI || (isLocalDemo ? "http://localhost:4000/api/events" : "/api/events");
   var KEY = "cf_session";
   var TIMEOUT = 30 * 60 * 1000;
+  var WORKSPACE_KEY = "traceAnalyticsWorkspace";
+
+  function workspaceId() {
+    var requested = new URLSearchParams(window.location.search).get("workspace");
+    if (requested && /^[a-zA-Z0-9_-]{1,80}$/.test(requested)) {
+      try { localStorage.setItem(WORKSPACE_KEY, requested); } catch (e) {}
+      return requested;
+    }
+    try { return localStorage.getItem(WORKSPACE_KEY) || "default"; } catch (e) { return "default"; }
+  }
 
   // The dashboard iframe is a read-only visual preview, not a real visitor session.
   if (new URLSearchParams(window.location.search).get("traceHeatmapPreview") === "1") return;
@@ -34,6 +44,7 @@
       url: pageUrl(),
       timestamp: new Date().toISOString()
     }, evt);
+    payload.workspace_id = workspaceId();
     try {
       fetch(API, {
         method: "POST",
