@@ -44,7 +44,9 @@
     if (event.key === "Escape") closeMenu();
   });
 
-  (new URLSearchParams(window.location.search).get("traceHeatmapPreview") === "1"\n    ? Promise.resolve(null)\n    : fetch(API + "/auth/me", { credentials: "include", cache: "no-store" }))
+  (new URLSearchParams(window.location.search).get("traceHeatmapPreview") === "1"
+    ? Promise.resolve(null)
+    : fetch(API + "/auth/me", { credentials: "include", cache: "no-store" }))
     .then(function (response) {
       if (!response || !response.ok) return null;
       return response.json();
