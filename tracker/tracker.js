@@ -41,7 +41,10 @@
     } catch (e) {}
   }
 
-  // Allow checkout.js to record product-only cart snapshots through the same session tracker.\n  window.traceTrack = { send: send };\n\n  function pageView() { send({ type: "page_view" }); }
+  // Allow checkout.js to record product-only cart snapshots through the same session tracker.
+  window.traceTrack = { send: send };
+
+  function pageView() { send({ type: "page_view" }); }
   pageView();
 
   document.addEventListener("click", function (e) {
