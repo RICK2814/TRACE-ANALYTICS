@@ -59,7 +59,7 @@ The repository includes a small outdoor-retail storefront to make the tracker ea
 
 Use the hosted application to review the Admin dashboard:
 
-**Application:** [TRACE Analytics](https://trace-analytics-one.vercel.app/)
+**Application:** [Live HTML Website](https://trace-analytics-one.vercel.app/demo.html)
 
 | Field | Evaluation value |
 |---|---|
