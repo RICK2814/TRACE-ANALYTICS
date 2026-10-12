@@ -2,9 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const mongoose = require("mongoose");
 const routes = require("./routes/events");
 const authRoutes = require("./routes/auth");
+const { ensureMongo } = require("./db");
 
 const app = express();
 const origins = (process.env.CORS_ORIGIN || "*").split(",").map((s) => s.trim());
@@ -15,27 +15,6 @@ app.use(express.json({ limit: "100kb", type: ["application/json", "text/plain"] 
 app.use("/api/events", rateLimit({ windowMs: 60_000, limit: 300, standardHeaders: true, legacyHeaders: false }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-let connectionPromise;
-async function ensureMongo(_req, _res, next) {
-  if (mongoose.connection.readyState === 1) return next();
-  if (!process.env.MONGO_URI) {
-    const error = new Error("MONGO_URI environment variable is not configured");
-    error.status = 503;
-    return next(error);
-  }
-  if (!connectionPromise || mongoose.connection.readyState === 0 || mongoose.connection.readyState === 3) {
-    connectionPromise = mongoose.connect(process.env.MONGO_URI).catch((error) => {
-      connectionPromise = null;
-      throw error;
-    });
-  }
-  try {
-    await connectionPromise;
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
 app.use("/api/auth", authRoutes);
 app.use("/api", ensureMongo, routes);
 

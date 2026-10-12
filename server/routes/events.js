@@ -1,6 +1,6 @@
 const express = require("express");
 const Event = require("../models/Event");
-const { requireAdmin } = require("../middleware/adminAuth");
+const { requireAuth } = require("../middleware/adminAuth");
 
 const router = express.Router();
 const TYPES = ["page_view", "click"];
@@ -41,7 +41,7 @@ router.post("/events", async (req, res, next) => {
 });
 
 // 2. Sessions with event counts
-router.get("/sessions", requireAdmin, async (req, res, next) => {
+router.get("/sessions", requireAuth, async (req, res, next) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 100, 500);
     const skip = Math.max(Number(req.query.skip) || 0, 0);
@@ -63,7 +63,7 @@ router.get("/sessions", requireAdmin, async (req, res, next) => {
 });
 
 // 3. All events for one session, in order
-router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
+router.get("/sessions/:id/events", requireAuth, async (req, res, next) => {
   try {
     const events = await Event.find({ session_id: req.params.id })
       .sort({ timestamp: 1, _id: 1 }).lean();
@@ -72,7 +72,7 @@ router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
 });
 
 // 4a. Pages that have click data
-router.get("/pages", requireAdmin, async (_req, res, next) => {
+router.get("/pages", requireAuth, async (_req, res, next) => {
   try {
     const rows = await Event.aggregate([
       { $match: { type: "click" } },
@@ -85,7 +85,7 @@ router.get("/pages", requireAdmin, async (_req, res, next) => {
 });
 
 // 4b. Click data for one page (heatmap)
-router.get("/heatmap", requireAdmin, async (req, res, next) => {
+router.get("/heatmap", requireAuth, async (req, res, next) => {
   try {
     if (!req.query.url) return res.status(400).json({ error: "url query param is required" });
     const clicks = await Event.find(
