@@ -136,7 +136,7 @@ router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
 
 // 4a. Pages visited by tracked users. URLs from this Vercel app are merged by pathname,
 // so activity on the production alias and preview aliases is shown together.
-router.get("/pages", requireAdmin, async (_req, res, next) => {
+router.get("/pages", requireAdmin, async (req, res, next) => {
   try {
     const rows = await Event.aggregate([
       { $match: scopedFilter(req, { type: { $in: ["page_view", "click"] } }) },
