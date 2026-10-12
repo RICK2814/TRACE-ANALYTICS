@@ -11,7 +11,7 @@ A small full-stack app that tracks page views and clicks on a webpage and shows 
 ## Project structure
 ```
 server/     Express API + MongoDB model
-tracker/    tracker.js and two demo pages
+tracker/    tracker.js, demo pages and checkout flow
 dashboard/  React dashboard (Sessions view, Heatmap view)
 ```
 
@@ -31,7 +31,7 @@ npm start                 # http://localhost:4000
 ```bash
 npx serve tracker -l 3000   # open http://localhost:3000/demo.html
 ```
-Click around, scroll, and visit `demo2.html`. Open an incognito window to create a second session.
+Click around, visit `demo2.html`, add products to your pack, and open `checkout.html` to try the demo checkout. Open an incognito window to create a second session.
 
 **3. Dashboard**
 ```bash
@@ -70,7 +70,7 @@ This repo uses Vercel Services so the dashboard, API, and tracked demo pages sha
 - `/` — React dashboard
 - `/api/...` — Express API
 - `/health` — API health check
-- `/demo.html`, `/demo2.html`, and `/tracker.js` — static tracked demo site, served by the dashboard service
+- `/demo.html`, `/demo2.html`, `/checkout.html`, and `/tracker.js` — static tracked demo store and checkout, served by the dashboard service
 - MongoDB Atlas — external managed database, accessed by the backend only
 
 ### Vercel steps
@@ -109,3 +109,12 @@ Troubleshooting: `/health` only confirms that the API process responds; use the 
 - On the tracked demo pages, the signed-in username, first-letter avatar and role are loaded from `/api/auth/me`. Sign out clears the session and returns to the login page.
 - Storefront example prices and the free-shipping threshold are displayed in Indian rupees (`₹`). They are illustrative demo prices, not live inventory or actual Flipkart/Amazon listings.
 - The existing tracking script remains enabled on both `/demo.html` and `/demo2.html`; clicks and page views still feed the Admin analytics.
+
+
+### Demo cart, checkout and payment methods
+
+- Add-to-pack controls store the selected product name, INR price, image, and quantity in browser localStorage under `trailCoCart`. The Pack button opens `/checkout.html`.
+- Checkout supports quantity changes, item removal, delivery details, a free-shipping threshold of ₹4,999, and a ₹99 demo delivery fee below that threshold.
+- Payment options include UPI, credit/debit card, net banking, and cash on delivery. They are **simulation-only**: no gateway is called, no card or bank credentials are collected, no money is charged, and no real shipment is created.
+- The order confirmation stores only a minimal demo receipt in localStorage; delivery details are not written to MongoDB or sent to a payment provider. To add a real gateway later, create server-side orders, verify provider signatures/webhooks on the backend, and keep all secret keys out of frontend code.
+- The existing `/tracker.js` remains enabled on the checkout page, so its page views and clicks continue to appear in Admin analytics. Cart and demo order state are not part of the analytics database.

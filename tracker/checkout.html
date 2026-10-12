@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f5ef">
+<meta name="description" content="Review your Trail Co. pack and try the demo checkout flow.">
+<title>Checkout — Trail Co.</title>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="stylesheet" href="/site.css?v=20261012-demo-checkout">
+<style>
+.checkout-page [hidden] { display: none !important; }
+.checkout-page { --checkout-ink:#202b24; --checkout-muted:#73786f; --checkout-line:#dedfd6; --checkout-card:#fffefa; }
+.checkout-shell { max-width: 1250px; margin: 0 auto; padding: 47px clamp(18px,5vw,68px) 85px; }
+.checkout-intro { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:27px; }
+.checkout-kicker { margin:0 0 11px; color:#b85f3d; font-size:10px; font-weight:800; letter-spacing:.17em; text-transform:uppercase; }
+.checkout-intro h1 { margin:0; color:var(--checkout-ink); font-family:Georgia,"Times New Roman",serif; font-size:clamp(38px,5vw,61px); font-weight:400; letter-spacing:-.055em; line-height:1.02; }
+.checkout-intro p { max-width:320px; margin:0; color:var(--checkout-muted); font-size:12px; line-height:1.8; }
+.checkout-steps { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:27px 0 25px; padding:15px 0; border-top:1px solid var(--checkout-line); border-bottom:1px solid var(--checkout-line); }
+.checkout-step { display:inline-flex; align-items:center; gap:8px; color:#73786f; font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+.checkout-step span { display:grid; place-items:center; width:23px; height:23px; border:1px solid #d2d6ca; border-radius:50%; font-size:9px; }
+.checkout-step.active { color:var(--checkout-ink); font-weight:800; }
+.checkout-step.active span { border-color:#243b2e; color:white; background:#243b2e; }
+.checkout-step-separator { width:32px; height:1px; background:var(--checkout-line); }
+.checkout-layout { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(270px,.85fr); align-items:start; gap:24px; }
+.checkout-primary { display:grid; gap:18px; min-width:0; }
+.checkout-panel, .summary-panel { border:1px solid var(--checkout-line); background:var(--checkout-card); }
+.checkout-panel { padding:clamp(18px,3vw,28px); }
+.checkout-panel-head { display:flex; align-items:flex-start; gap:13px; margin-bottom:19px; }
+.checkout-panel-number { display:grid; place-items:center; flex:0 0 31px; width:31px; height:31px; border:1px solid #cdd3c5; border-radius:50%; color:#243b2e; font-family:Georgia,serif; font-size:14px; }
+.checkout-panel-head h2 { margin:1px 0 4px; color:var(--checkout-ink); font-family:Georgia,"Times New Roman",serif; font-size:25px; font-weight:400; letter-spacing:-.03em; }
+.checkout-panel-head p { margin:0; color:var(--checkout-muted); font-size:11px; line-height:1.7; }
+.checkout-cart-items { display:grid; gap:0; }
+.checkout-cart-line { display:grid; grid-template-columns:86px minmax(0,1fr) auto; align-items:start; gap:14px; padding:17px 0; border-top:1px solid #e8e8df; }
+.checkout-cart-line:first-child { border-top:0; padding-top:0; }
+.checkout-cart-image { width:86px; height:105px; object-fit:cover; background:#e7e7de; }
+.checkout-item-name { margin:2px 0 6px; color:var(--checkout-ink); font-size:13px; font-weight:800; line-height:1.4; }
+.checkout-item-unit { color:var(--checkout-muted); font-size:10px; }
+.checkout-quantity-row { display:flex; align-items:center; gap:10px; margin-top:14px; }
+.quantity-control { display:inline-flex; align-items:center; height:30px; border:1px solid #d4d8cd; }
+.quantity-control button { display:grid; place-items:center; width:29px; height:28px; border:0; color:#243b2e; background:transparent; font-size:17px; }
+.quantity-control button:hover { background:#eff0e8; }
+.quantity-control span { min-width:26px; text-align:center; font-size:11px; font-weight:700; }
+.remove-item { border:0; padding:5px 0; color:#858a7e; background:transparent; font-size:10px; text-decoration:underline; text-underline-offset:3px; }
+.remove-item:hover { color:#a2462d; }
+.checkout-line-total { color:var(--checkout-ink); font-size:12px; font-weight:800; white-space:nowrap; text-align:right; }
+.checkout-continue { display:inline-flex; gap:8px; align-items:center; margin-top:13px; color:#334b3b; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; text-decoration:none; }
+.checkout-continue:hover { text-decoration:underline; text-underline-offset:4px; }
+.empty-cart { padding:15px 0 6px; }
+.empty-cart-mark { display:grid; place-items:center; width:45px; height:45px; margin-bottom:15px; border:1px solid var(--checkout-line); border-radius:50%; color:#243b2e; font-size:21px; }
+.empty-cart h3 { margin:0 0 7px; font-family:Georgia,serif; font-size:25px; font-weight:400; }
+.empty-cart p { margin:0 0 19px; color:var(--checkout-muted); font-size:12px; line-height:1.75; }
+.checkout-form { display:grid; gap:18px; }
+.checkout-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.checkout-field { display:grid; gap:6px; min-width:0; }
+.checkout-field.full { grid-column:1 / -1; }
+.checkout-field label, .checkout-field > span { color:#475247; font-size:10px; font-weight:800; letter-spacing:.025em; }
+.checkout-field input, .checkout-field select, .checkout-field textarea { width:100%; min-height:44px; border:1px solid #d2d7cc; border-radius:0; padding:11px 12px; outline:0; color:var(--checkout-ink); background:#fffefa; font-size:12px; }
+.checkout-field textarea { min-height:77px; resize:vertical; }
+.checkout-field input:focus, .checkout-field select:focus, .checkout-field textarea:focus { border-color:#61755f; box-shadow:0 0 0 3px rgba(64,94,62,.09); }
+.checkout-field input::placeholder, .checkout-field textarea::placeholder { color:#9a9f94; }
+.checkout-safe-note { margin:16px 0 0; color:var(--checkout-muted); font-size:10px; line-height:1.7; }
+.demo-payment-banner { display:flex; align-items:flex-start; gap:11px; margin:0 0 17px; padding:13px 14px; border:1px solid #d6d9cb; color:#465445; background:#f2f3eb; font-size:11px; line-height:1.7; }
+.demo-payment-banner strong { display:block; margin-bottom:2px; font-size:10px; letter-spacing:.09em; text-transform:uppercase; }
+.demo-payment-banner .demo-icon { display:grid; place-items:center; flex:0 0 27px; width:27px; height:27px; border-radius:50%; color:white; background:#243b2e; font-size:13px; }
+.payment-choices { display:grid; gap:9px; border:0; margin:0; padding:0; }
+.payment-choice { display:flex; align-items:center; gap:12px; padding:13px; border:1px solid #dedfd6; background:#fffefa; cursor:pointer; transition:border-color .16s,background .16s; }
+.payment-choice.selected { border-color:#526c53; background:#f2f4ed; }
+.payment-choice input { margin:0; width:16px; height:16px; accent-color:#243b2e; flex:0 0 auto; }
+.payment-symbol { display:grid; place-items:center; flex:0 0 38px; width:38px; height:38px; color:#243b2e; background:#e8ebe1; font-size:10px; font-weight:800; letter-spacing:-.03em; }
+.payment-copy { min-width:0; flex:1; }
+.payment-copy strong { display:block; margin-bottom:3px; color:var(--checkout-ink); font-size:12px; }
+.payment-copy small { display:block; color:var(--checkout-muted); font-size:10px; line-height:1.6; }
+.payment-demo-tag { padding:4px 6px; color:#5f6b5c; background:#e8ebe1; font-size:8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.payment-instructions { margin:12px 0 0; padding:12px 13px; border-left:2px solid #87967c; color:#596357; background:#f6f6f0; font-size:10px; line-height:1.75; }
+.place-order { display:flex; justify-content:space-between; align-items:center; gap:15px; width:100%; min-height:52px; padding:0 18px; border:1px solid #243b2e; color:white; background:#243b2e; font-size:11px; font-weight:800; letter-spacing:.05em; text-align:left; cursor:pointer; transition:background .18s; }
+.place-order:hover { background:#172b20; }
+.place-order:disabled { opacity:.5; cursor:not-allowed; }
+.place-order span:last-child { font-size:15px; white-space:nowrap; }
+.checkout-legal { margin:10px 0 0; color:#7d8378; font-size:9px; line-height:1.7; text-align:center; }
+.summary-panel { position:sticky; top:102px; padding:23px; }
+.summary-title { margin:0 0 5px; color:var(--checkout-ink); font-family:Georgia,serif; font-size:26px; font-weight:400; letter-spacing:-.03em; }
+.summary-subtitle { margin:0 0 18px; color:var(--checkout-muted); font-size:10px; line-height:1.65; }
+.summary-items { display:grid; gap:12px; margin-bottom:18px; }
+.summary-item { display:flex; justify-content:space-between; gap:14px; color:#5e685d; font-size:10px; line-height:1.6; }
+.summary-item strong { color:var(--checkout-ink); font-size:11px; white-space:nowrap; }
+.summary-breakdown { display:grid; gap:11px; padding:17px 0; border-top:1px solid var(--checkout-line); border-bottom:1px solid var(--checkout-line); }
+.summary-row { display:flex; justify-content:space-between; gap:12px; color:#606a60; font-size:11px; }
+.summary-row strong { color:var(--checkout-ink); font-weight:700; }
+.summary-row .free-shipping { color:#3c6d45; font-weight:800; }
+.summary-total { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding-top:18px; color:var(--checkout-ink); }
+.summary-total span { font-size:12px; font-weight:800; }
+.summary-total strong { font-family:Georgia,serif; font-size:27px; font-weight:400; letter-spacing:-.03em; }
+.shipping-note { display:flex; gap:8px; margin-top:18px; padding:12px; color:#5a6756; background:#eef0e6; font-size:10px; line-height:1.7; }
+.shipping-note strong { display:block; margin-bottom:2px; }
+.checkout-secure-note { display:flex; justify-content:center; gap:8px; margin-top:17px; color:#858b80; font-size:9px; letter-spacing:.04em; }
+.order-success { max-width:710px; margin:38px auto 0; padding:clamp(24px,5vw,48px); border:1px solid #d9ded1; background:#fffefa; text-align:center; }
+.order-success-mark { display:grid; place-items:center; width:64px; height:64px; margin:0 auto 22px; border-radius:50%; color:white; background:#243b2e; font-size:30px; }
+.order-success .checkout-kicker { margin-bottom:11px; }
+.order-success h2 { margin:0 0 12px; font-family:Georgia,serif; font-size:clamp(35px,5vw,52px); font-weight:400; letter-spacing:-.04em; line-height:1.05; }
+.order-success p { max-width:470px; margin:0 auto 12px; color:var(--checkout-muted); font-size:12px; line-height:1.85; }
+.order-reference { display:inline-block; margin:13px 0 22px; padding:9px 12px; border:1px dashed #c8d0c2; color:#324b37; background:#f4f5ed; font-size:11px; font-weight:800; letter-spacing:.08em; }
+.order-success-actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.checkout-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; max-width:1250px; margin:0 auto; padding:18px clamp(18px,5vw,68px) 28px; border-top:1px solid var(--checkout-line); color:#858b80; font-size:9px; }
+.checkout-footer a { color:#4b5c4a; }
+@media(max-width:900px) {
+  .checkout-layout { grid-template-columns:minmax(0,1fr); }
+  .summary-panel { position:static; grid-row:1; }
+  .checkout-intro { align-items:flex-start; flex-direction:column; }
+  .checkout-intro p { max-width:540px; }
+}
+@media(max-width:600px) {
+  .checkout-shell { padding:31px 16px 56px; }
+  .checkout-intro h1 { font-size:43px; }
+  .checkout-steps { gap:7px; justify-content:space-between; }
+  .checkout-step { gap:5px; font-size:8px; letter-spacing:0; }
+  .checkout-step span { width:21px; height:21px; }
+  .checkout-step-separator { width:11px; }
+  .checkout-panel { padding:18px 15px; }
+  .checkout-panel-head h2 { font-size:23px; }
+  .checkout-cart-line { grid-template-columns:70px minmax(0,1fr); gap:11px; }
+  .checkout-cart-image { width:70px; height:88px; grid-row:span 2; }
+  .checkout-line-total { grid-column:2; grid-row:2; text-align:left; padding-top:2px; }
+  .checkout-quantity-row { margin-top:9px; gap:9px; }
+  .checkout-field-grid { grid-template-columns:1fr; gap:12px; }
+  .checkout-field.full { grid-column:auto; }
+  .summary-panel { padding:19px; }
+  .summary-total strong { font-size:25px; }
+  .payment-choice { padding:10px; gap:9px; }
+  .payment-symbol { flex-basis:33px; width:33px; height:33px; }
+  .payment-demo-tag { display:none; }
+  .place-order { min-height:50px; padding:0 13px; font-size:10px; }
+  .checkout-footer { flex-direction:column; padding-right:16px; padding-left:16px; }
+}
+@media(prefers-reduced-motion:reduce) { .checkout-page *, .checkout-page *:before, .checkout-page *:after { transition:none !important; } }
+</style>
+</head>
+<body class="checkout-page">
+<div class="announcement">Trail Co. checkout <span aria-hidden="true">·</span> Secure-looking demo flow, no real charge</div>
+<header class="site-header">
+  <a class="brand" href="/demo.html" aria-label="Trail Co. home"><span class="brand-stamp">t.</span><span class="brand-word">TRAIL CO.<small>GOODS FOR OUT THERE</small></span></a>
+  <nav class="site-nav" id="main-nav" aria-label="Main navigation">
+    <a href="/demo.html">Home</a><a href="/demo2.html#shop">Shop all</a><a href="/demo.html#journal">Field notes</a>
+    <a class="signin-link" id="trace-signin" href="/">Sign in</a>
+    <button class="signout-button" id="trace-signout" type="button" hidden>Sign out ↗</button>
+  </nav>
+  <div class="header-actions">
+    <div class="account-pill" id="trace-account" hidden aria-label="Signed-in account"><span class="account-avatar" id="trace-account-avatar">U</span><span class="account-copy"><strong id="trace-account-name">Account</strong><small id="trace-account-role">USER</small></span></div>
+    <a class="bag-button" href="#order-summary">Your pack <span class="bag-count" data-cart-count>0</span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">Menu +</button>
+  </div>
+</header>
+
+<main class="checkout-shell">
+  <div class="checkout-intro">
+    <div><p class="checkout-kicker">Almost out the door</p><h1>Your pack,<br>ready to go.</h1></div>
+    <p>Review your kit, add delivery details and choose how you would pay. This is a demo checkout, so you can test the flow without making a real payment.</p>
+  </div>
+  <div class="checkout-steps" aria-label="Checkout steps">
+    <div class="checkout-step active"><span>1</span> Your pack</div><i class="checkout-step-separator"></i>
+    <div class="checkout-step active"><span>2</span> Delivery</div><i class="checkout-step-separator"></i>
+    <div class="checkout-step active"><span>3</span> Payment</div>
+  </div>
+
+  <div class="checkout-layout" id="checkout-layout">
+    <div class="checkout-primary">
+      <section class="checkout-panel" id="cart-panel">
+        <div class="checkout-panel-head"><span class="checkout-panel-number">01</span><div><h2>Your pack</h2><p id="cart-count-label">Your selected Trail Co. pieces.</p></div></div>
+        <div class="checkout-cart-items" id="cart-items"></div>
+        <div class="empty-cart" id="empty-cart" hidden><span class="empty-cart-mark">↗</span><h3>A little room for adventure.</h3><p>Your pack is empty. Find a few useful things for the next trip, then come back here to check out.</p><a class="button-primary" href="/demo2.html#shop">Explore the collection <span aria-hidden="true">↗</span></a></div>
+        <a class="checkout-continue" href="/demo2.html#shop">← Continue shopping</a>
+      </section>
+
+      <form id="checkout-form" class="checkout-form">
+        <section class="checkout-panel">
+          <div class="checkout-panel-head"><span class="checkout-panel-number">02</span><div><h2>Delivery details</h2><p>Where should we send your kit?</p></div></div>
+          <div class="checkout-field-grid">
+            <div class="checkout-field full"><label for="customer-name">Full name</label><input id="customer-name" name="customerName" autocomplete="name" placeholder="Your name" required maxlength="100"></div>
+            <div class="checkout-field"><label for="customer-email">Email address</label><input id="customer-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required maxlength="150"></div>
+            <div class="checkout-field"><label for="customer-phone">Mobile number</label><input id="customer-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit mobile number" pattern="[6-9][0-9]{9}" title="Enter a valid 10-digit Indian mobile number" required maxlength="10"></div>
+            <div class="checkout-field full"><label for="customer-address">House / street / area</label><textarea id="customer-address" name="address" autocomplete="street-address" placeholder="House number, street, area" required maxlength="300"></textarea></div>
+            <div class="checkout-field"><label for="customer-city">City / town</label><input id="customer-city" name="city" autocomplete="address-level2" placeholder="City or town" required maxlength="100"></div>
+            <div class="checkout-field"><label for="customer-state">State</label><select id="customer-state" name="state" autocomplete="address-level1" required><option value="">Choose state</option><option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option><option>Delhi</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Other</option></select></div>
+            <div class="checkout-field"><label for="customer-pincode">PIN code</label><input id="customer-pincode" name="pincode" inputmode="numeric" autocomplete="postal-code" placeholder="6-digit PIN code" pattern="[1-9][0-9]{5}" title="Enter a valid 6-digit Indian PIN code" required maxlength="6"></div>
+          </div>
+          <p class="checkout-safe-note">Demo privacy note: your delivery details are only used to validate this form and are not sent to a payment provider or stored as an order in the backend.</p>
+        </section>
+
+        <section class="checkout-panel">
+          <div class="checkout-panel-head"><span class="checkout-panel-number">03</span><div><h2>Payment method</h2><p>Choose an option to preview the payment step.</p></div></div>
+          <div class="demo-payment-banner"><span class="demo-icon">i</span><div><strong>Demo mode · No real payment</strong>UPI, card and net banking options below are placeholders. No payment window opens and no money is charged. You can connect a gateway later.</div></div>
+          <fieldset class="payment-choices" aria-label="Payment method">
+            <label class="payment-choice selected"><input type="radio" name="paymentMethod" value="upi" checked required><span class="payment-symbol">UPI</span><span class="payment-copy"><strong>UPI</strong><small>Google Pay, PhonePe, Paytm or any UPI app</small></span><span class="payment-demo-tag">Demo</span></label>
+            <label class="payment-choice"><input type="radio" name="paymentMethod" value="card" required><span class="payment-symbol">CARD</span><span class="payment-copy"><strong>Credit / Debit card</strong><small>Visa, Mastercard, RuPay and other cards</small></span><span class="payment-demo-tag">Demo</span></label>
+            <label class="payment-choice"><input type="radio" name="paymentMethod" value="netbanking" required><span class="payment-symbol">NET</span><span class="payment-copy"><strong>Net banking</strong><small>Select your bank at the real gateway stage</small></span><span class="payment-demo-tag">Demo</span></label>
+            <label class="payment-choice"><input type="radio" name="paymentMethod" value="cod" required><span class="payment-symbol">COD</span><span class="payment-copy"><strong>Cash on delivery</strong><small>Shown as a demo option; no order is dispatched</small></span><span class="payment-demo-tag">Demo</span></label>
+          </fieldset>
+          <p class="payment-instructions" id="payment-instructions" role="status" aria-live="polite">UPI selected. A real UPI payment request will be connected here when you add a payment gateway.</p>
+        </section>
+        <div>
+          <button class="place-order" id="place-order" type="submit"><span id="place-order-label">Simulate payment &amp; place demo order</span><span id="place-order-total">₹0</span></button>
+          <p class="checkout-legal">Demo only. This button does not charge money, contact a bank or create a real shipment.</p>
+        </div>
+      </form>
+    </div>
+
+    <aside class="summary-panel" id="order-summary" aria-label="Order summary">
+      <h2 class="summary-title">Order summary</h2><p class="summary-subtitle" id="summary-subtitle">A clear view of what's in your pack.</p>
+      <div class="summary-items" id="summary-items"></div>
+      <div class="summary-breakdown">
+        <div class="summary-row"><span>Subtotal</span><strong id="summary-subtotal">₹0</strong></div>
+        <div class="summary-row"><span>Delivery</span><strong id="summary-shipping">₹0</strong></div>
+        <div class="summary-row"><span>Taxes</span><strong>Included</strong></div>
+      </div>
+      <div class="summary-total"><span>Total</span><strong id="summary-total">₹0</strong></div>
+      <div class="shipping-note"><span aria-hidden="true">✳</span><div><strong id="shipping-note-title">Free delivery above ₹4,999</strong><span id="shipping-note-copy">Add pieces to see your delivery estimate.</span></div></div>
+      <div class="checkout-secure-note"><span aria-hidden="true">◈</span> Demo checkout · No payment is taken</div>
+    </aside>
+  </div>
+
+  <section class="order-success" id="order-success" hidden aria-live="polite">
+    <div class="order-success-mark">✓</div><p class="checkout-kicker">Demo order complete</p><h2>Well packed.<br>Ready for the next trip.</h2>
+    <p id="success-copy">Your demo order has been recorded in this browser only.</p>
+    <div class="order-reference" id="order-reference">TC-DEMO-00000000</div>
+    <p id="success-total"></p><p><strong>No real payment was processed.</strong> This is a front-end demonstration, not a real purchase or shipment.</p>
+    <div class="order-success-actions"><a class="button-primary" href="/demo2.html#shop">Keep exploring <span aria-hidden="true">↗</span></a><a class="button-secondary" href="/demo.html">Back to Trail Co.</a></div>
+  </section>
+</main>
+
+<footer class="checkout-footer"><span>© 2026 Trail Co. · Goods for out there.</span><span>Demo experience only · <a href="/demo.html">Back to the store</a></span></footer>
+
+<script src="/tracker.js" data-api="/api/events"></script>
+<script src="/session-ui.js?v=20261012-checkout"></script>
+<script>
+(function () {
+  "use strict";
+  var CART_KEY = "trailCoCart";
+  var FREE_SHIPPING_THRESHOLD = 4999;
+  var SHIPPING_FEE = 99;
+  var cart = readCart();
+
+  function readCart() {
+    try {
+      var data = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+      if (!Array.isArray(data)) return [];
+      return data.filter(function (item) {
+        return item && typeof item.name === "string" && Number(item.price) > 0 && Number(item.quantity) > 0;
+      }).map(function (item) {
+        return {
+          id: String(item.id || item.name),
+          name: String(item.name),
+          price: Math.round(Number(item.price)),
+          image: typeof item.image === "string" ? item.image : "",
+          quantity: Math.max(1, Math.min(99, Math.floor(Number(item.quantity))))
+        };
+      });
+    } catch (_) { return []; }
+  }
+
+  function money(amount) {
+    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(Math.max(0, Math.round(amount)));
+  }
+  function countItems() {
+    return cart.reduce(function (sum, item) { return sum + item.quantity; }, 0);
+  }
+  function subtotal() {
+    return cart.reduce(function (sum, item) { return sum + item.price * item.quantity; }, 0);
+  }
+  function shipping() {
+    var sub = subtotal();
+    return sub === 0 || sub >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  }
+  function total() { return subtotal() + shipping(); }
+  function saveCart() {
+    try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (_) {}
+    render();
+  }
+  function create(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function validImage(url) {
+    return typeof url === "string" && url.indexOf("https://images.unsplash.com/") === 0 ? url : "";
+  }
+
+  function renderCartItems() {
+    var host = document.getElementById("cart-items");
+    host.replaceChildren();
+    cart.forEach(function (item) {
+      var row = create("article", "checkout-cart-line");
+      var image = create("img", "checkout-cart-image");
+      image.alt = item.name;
+      image.loading = "lazy";
+      image.src = validImage(item.image) || "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=300&q=70";
+      row.appendChild(image);
+
+      var info = create("div", "checkout-item-info");
+      info.appendChild(create("h3", "checkout-item-name", item.name));
+      info.appendChild(create("p", "checkout-item-unit", money(item.price) + " each"));
+      var quantityRow = create("div", "checkout-quantity-row");
+      var quantity = create("div", "quantity-control");
+      var minus = create("button", "", "−");
+      minus.type = "button";
+      minus.setAttribute("aria-label", "Decrease quantity of " + item.name);
+      minus.addEventListener("click", function () {
+        if (item.quantity > 1) item.quantity -= 1;
+        else cart = cart.filter(function (entry) { return entry.id !== item.id; });
+        saveCart();
+      });
+      var qty = create("span", "", String(item.quantity));
+      var plus = create("button", "", "+");
+      plus.type = "button";
+      plus.setAttribute("aria-label", "Increase quantity of " + item.name);
+      plus.disabled = item.quantity >= 99;
+      plus.addEventListener("click", function () {
+        if (item.quantity < 99) item.quantity += 1;
+        saveCart();
+      });
+      quantity.appendChild(minus); quantity.appendChild(qty); quantity.appendChild(plus);
+      quantityRow.appendChild(quantity);
+      var remove = create("button", "remove-item", "Remove");
+      remove.type = "button";
+      remove.addEventListener("click", function () {
+        cart = cart.filter(function (entry) { return entry.id !== item.id; });
+        saveCart();
+      });
+      quantityRow.appendChild(remove);
+      info.appendChild(quantityRow);
+      row.appendChild(info);
+      row.appendChild(create("div", "checkout-line-total", money(item.price * item.quantity)));
+      host.appendChild(row);
+    });
+  }
+
+  function renderSummary() {
+    var host = document.getElementById("summary-items");
+    host.replaceChildren();
+    cart.forEach(function (item) {
+      var row = create("div", "summary-item");
+      row.appendChild(create("span", "", item.name + " × " + item.quantity));
+      row.appendChild(create("strong", "", money(item.price * item.quantity)));
+      host.appendChild(row);
+    });
+    document.getElementById("summary-subtotal").textContent = money(subtotal());
+    document.getElementById("summary-shipping").textContent = shipping() === 0 ? (subtotal() >= FREE_SHIPPING_THRESHOLD ? "Free" : "—") : money(shipping());
+    document.getElementById("summary-total").textContent = money(total());
+    document.getElementById("place-order-total").textContent = money(total());
+    document.getElementById("cart-count-label").textContent = countItems() + (countItems() === 1 ? " item selected." : " items selected.");
+    document.getElementById("summary-subtitle").textContent = countItems() + (countItems() === 1 ? " piece in your pack." : " pieces in your pack.");
+    var title = document.getElementById("shipping-note-title");
+    var copy = document.getElementById("shipping-note-copy");
+    if (subtotal() >= FREE_SHIPPING_THRESHOLD) {
+      title.textContent = "You've unlocked free delivery";
+      copy.textContent = "This demo order qualifies for free delivery.";
+    } else if (subtotal() > 0) {
+      title.textContent = "You're " + money(FREE_SHIPPING_THRESHOLD - subtotal()) + " from free delivery";
+      copy.textContent = "A demo delivery fee of " + money(SHIPPING_FEE) + " applies under " + money(FREE_SHIPPING_THRESHOLD) + ".";
+    } else {
+      title.textContent = "Free delivery above " + money(FREE_SHIPPING_THRESHOLD);
+      copy.textContent = "Add pieces to see your delivery estimate.";
+    }
+    document.querySelectorAll("[data-cart-count]").forEach(function (node) { node.textContent = String(countItems()); });
+  }
+
+  function render() {
+    renderCartItems();
+    renderSummary();
+    var empty = cart.length === 0;
+    document.getElementById("empty-cart").hidden = !empty;
+    document.getElementById("checkout-form").hidden = empty;
+    document.getElementById("cart-items").hidden = empty;
+    document.querySelector(".checkout-continue").hidden = empty;
+    document.getElementById("place-order").disabled = empty;
+  }
+
+  function selectedPayment() {
+    var input = document.querySelector('input[name="paymentMethod"]:checked');
+    return input ? input.value : "upi";
+  }
+  function updatePaymentMethod() {
+    var method = selectedPayment();
+    var messages = {
+      upi: "UPI selected. A real UPI payment request will be connected here when you add a payment gateway.",
+      card: "Card selected. This demo does not ask for or collect card numbers. Connect your gateway's hosted checkout when ready.",
+      netbanking: "Net banking selected. A real checkout would redirect to your payment provider or bank; this demo does not redirect.",
+      cod: "Cash on delivery selected. This only simulates the choice; no courier or real order is created."
+    };
+    document.querySelectorAll(".payment-choice").forEach(function (label) {
+      var input = label.querySelector("input");
+      label.classList.toggle("selected", Boolean(input && input.checked));
+    });
+    document.getElementById("payment-instructions").textContent = messages[method] || messages.upi;
+    document.getElementById("place-order-label").textContent = method === "cod" ? "Place demo order" : "Simulate payment & place demo order";
+  }
+
+  document.querySelectorAll('input[name="paymentMethod"]').forEach(function (input) {
+    input.addEventListener("change", updatePaymentMethod);
+  });
+
+  document.getElementById("checkout-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    var form = event.currentTarget;
+    if (!cart.length) return;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    var orderId = "TC-DEMO-" + String(Date.now()).slice(-8);
+    var method = selectedPayment();
+    var methodLabel = {
+      upi: "UPI (demo only)",
+      card: "Credit / Debit card (demo only)",
+      netbanking: "Net banking (demo only)",
+      cod: "Cash on delivery (demo only)"
+    }[method] || "Demo payment";
+    var order = {
+      id: orderId,
+      items: cart.map(function (item) { return { name: item.name, quantity: item.quantity, price: item.price }; }),
+      subtotal: subtotal(),
+      shipping: shipping(),
+      total: total(),
+      paymentMethod: methodLabel,
+      createdAt: new Date().toISOString(),
+      demoOnly: true
+    };
+    try { localStorage.setItem("trailCoLastDemoOrder", JSON.stringify(order)); } catch (_) {}
+
+    cart = [];
+    try { localStorage.setItem(CART_KEY, "[]"); } catch (_) {}
+    document.getElementById("checkout-layout").hidden = true;
+    document.getElementById("order-success").hidden = false;
+    document.getElementById("order-reference").textContent = orderId;
+    document.getElementById("success-copy").textContent = "Your demo order was completed in this browser using " + methodLabel + ". No money was charged and no real order was sent to a store.";
+    document.getElementById("success-total").textContent = "Demo order total: " + money(order.total);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  var menu = document.querySelector(".menu-toggle");
+  var nav = document.querySelector(".site-nav");
+  if (menu && nav) {
+    menu.addEventListener("click", function () {
+      var open = nav.classList.toggle("is-open");
+      menu.setAttribute("aria-expanded", String(open));
+      menu.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+      menu.textContent = open ? "Close ×" : "Menu +";
+    });
+    nav.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        nav.classList.remove("is-open");
+        menu.setAttribute("aria-expanded", "false");
+        menu.setAttribute("aria-label", "Open navigation");
+        menu.textContent = "Menu +";
+      });
+    });
+  }
+
+  updatePaymentMethod();
+  render();
+})();
+</script>
+</body>
+</html>
