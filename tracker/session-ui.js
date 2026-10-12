@@ -1,7 +1,11 @@
-/* Show a sign-out control for authenticated sessions and return to the login page. */
+/* Populate the signed-in account chip and support a safe sign-out. */
 (function () {
   var button = document.getElementById("trace-signout");
-  if (!button) return;
+  var account = document.getElementById("trace-account");
+  var accountName = document.getElementById("trace-account-name");
+  var accountAvatar = document.getElementById("trace-account-avatar");
+  var accountRole = document.getElementById("trace-account-role");
+  if (!button || !account) return;
 
   var isLocalDemo = (location.hostname === "localhost" || location.hostname === "127.0.0.1") && location.port === "3000";
   var API = isLocalDemo ? "http://localhost:4000/api" : "/api";
@@ -11,10 +15,26 @@
       if (!response.ok) return null;
       return response.json();
     })
-    .then(function (user) {
-      if (user && user.authenticated) button.hidden = false;
+    .then(function (session) {
+      if (!session || !session.authenticated) {
+        account.hidden = true;
+        button.hidden = true;
+        return;
+      }
+
+      var username = String(session.username || "Account");
+      var role = String(session.role || "user").toUpperCase();
+      accountName.textContent = username;
+      accountAvatar.textContent = (Array.from(username.trim())[0] || "U").toUpperCase();
+      accountRole.textContent = role;
+      account.setAttribute("aria-label", "Signed in as " + username + " (" + role + ")");
+      account.hidden = false;
+      button.hidden = false;
     })
-    .catch(function () {});
+    .catch(function () {
+      account.hidden = true;
+      button.hidden = true;
+    });
 
   button.addEventListener("click", async function () {
     button.disabled = true;
