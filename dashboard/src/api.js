@@ -3,7 +3,8 @@
 export const API = import.meta.env.VITE_API || (import.meta.env.DEV ? "http://localhost:4000/api" : "/api");
 
 function withWorkspace(path) {
-  if (!/^\\/(?:sessions(?:\\/|$)|pages(?:\\/|$)|heatmap(?:\\/|$)|checkout-activity(?:\\/|$)|db-status(?:\\/|$))/.test(path)) {
+  const scopedRoots = ["/sessions", "/pages", "/heatmap", "/checkout-activity", "/db-status"];
+  if (!scopedRoots.some((root) => path === root || path.startsWith(root + "/") || path.startsWith(root + "?"))) {
     return path;
   }
   let workspaceId = "default";
