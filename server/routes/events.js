@@ -84,14 +84,18 @@ router.get("/sessions/:id/events", requireAdmin, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// 4a. Pages that have click data
+// 4a. Pages visited by tracked users, including pages with zero clicks so far.
 router.get("/pages", requireAdmin, async (_req, res, next) => {
   try {
     const rows = await Event.aggregate([
-      { $match: { type: "click" } },
-      { $group: { _id: "$url", clicks: { $sum: 1 } } },
-      { $sort: { clicks: -1 } },
-      { $project: { _id: 0, url: "$_id", clicks: 1 } },
+      { $group: {
+          _id: "$url",
+          clicks: { $sum: { $cond: [{ $eq: ["$type", "click"] }, 1, 0] } },
+          page_views: { $sum: { $cond: [{ $eq: ["$type", "page_view"] }, 1, 0] } },
+          last_seen: { $max: "$timestamp" }
+      }},
+      { $sort: { clicks: -1, page_views: -1, last_seen: -1 } },
+      { $project: { _id: 0, url: "$_id", clicks: 1, page_views: 1, last_seen: 1 } }
     ]);
     res.json(rows);
   } catch (err) { next(err); }

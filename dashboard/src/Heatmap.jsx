@@ -41,21 +41,34 @@ export default function Heatmap() {
   const [error, setError] = useState("");
   const [showPage, setShowPage] = useState(true);
   const [loadingClicks, setLoadingClicks] = useState(false);
+  const [loadingPages, setLoadingPages] = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
   const [width, setWidth] = useState(900);
   const boxRef = useRef(null);
   const canvasRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
+    setLoadingPages(true);
     get("/pages")
       .then((data) => {
         if (cancelled) return;
-        setPages(data);
-        if (data.length) setUrl((current) => current || data[0].url);
+        const list = Array.isArray(data) ? data : [];
+        setPages(list);
+        setUrl((current) => current && list.some((page) => page.url === current)
+          ? current
+          : (list[0]?.url || ""));
         setError("");
       })
-      .catch((e) => { if (!cancelled) setError(e.message || "Could not load pages."); });
+      .catch((e) => { if (!cancelled) setError(e.message || "Could not load pages."); })
+      .finally(() => { if (!cancelled) setLoadingPages(false); });
     return () => { cancelled = true; };
+  }, [refreshTick]);
+
+  // Keep the page list current while the dashboard is open; the manual refresh is available too.
+  useEffect(() => {
+    const timer = window.setInterval(() => setRefreshTick((tick) => tick + 1), 15000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -137,12 +150,26 @@ export default function Heatmap() {
           <div className="heatmap-controls">
             <label className="field-label" htmlFor="heatmap-page-select">PAGE TO ANALYZE</label>
             <select id="heatmap-page-select" value={url} onChange={(e) => setUrl(e.target.value)} aria-label="Page URL">
-              {pages.map((page) => <option key={page.url} value={page.url}>{page.url}</option>)}
+              {pages.map((page) => {
+                let label = page.url;
+                try { label = new URL(page.url).pathname || "/"; } catch {}
+                const viewCount = Number(page.page_views) || 0;
+                const clickCount = Number(page.clicks) || 0;
+                return <option key={page.url} value={page.url}>{label} — {clickCount} clicks · {viewCount} views</option>;
+              })}
             </select>
             <div className="heatmap-page-meta">
               <span className="page-meta-path">{selectedPage?.url ? (() => { try { return new URL(selectedPage.url).pathname; } catch { return selectedPage.url; } })() : "Select a page"}</span>
               <span className="page-meta-divider" />
               <span>{selectedPage?.clicks ?? clicks.length} recorded clicks</span>
+              <span className="page-meta-divider" />
+              <span>{selectedPage?.page_views ?? 0} page views</span>
+            </div>
+            <div className="heatmap-page-actions">
+              <button type="button" onClick={() => setRefreshTick((tick) => tick + 1)} disabled={loadingPages}>
+                {loadingPages ? "Refreshing…" : "Refresh pages"}
+              </button>
+              {url && <a href={url} target="_blank" rel="noreferrer">Open selected page ↗</a>}
             </div>
           </div>
 
@@ -159,6 +186,11 @@ export default function Heatmap() {
                 )}
                 <canvas ref={canvasRef} style={{ width, height }} aria-label="Click density overlay" />
               </div>
+              {!loadingClicks && clicks.length === 0 && (
+                <p className="heatmap-no-clicks">
+                  This page has no recorded clicks yet. Open the page, interact with it, then refresh the page list. Its page view can appear before its first click.
+                </p>
+              )}
               <div className="heatmap-footer-row">
                 <p className="muted">{loadingClicks ? "Updating click positions…" : `${clicks.length} click positions plotted`}</p>
                 <span className="heatmap-method">Page coordinates · scaled preview</span>

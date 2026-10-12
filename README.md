@@ -118,3 +118,9 @@ Troubleshooting: `/health` only confirms that the API process responds; use the 
 - Payment options include UPI, credit/debit card, net banking, and cash on delivery. They are **simulation-only**: no gateway is called, no card or bank credentials are collected, no money is charged, and no real shipment is created.
 - The order confirmation stores only a minimal demo receipt in localStorage; delivery details are not written to MongoDB or sent to a payment provider. To add a real gateway later, create server-side orders, verify provider signatures/webhooks on the backend, and keep all secret keys out of frontend code.
 - The existing `/tracker.js` remains enabled on the checkout page, so its page views and clicks continue to appear in Admin analytics. Cart and demo order state are not part of the analytics database.
+
+### Heatmap for nested pages (including checkout)
+
+- The Admin heatmap page list includes any URL that has a tracked page view, even before that URL has click events. The selector shows the URL path, click count, and page-view count.
+- The page list refreshes automatically while Heatmap is open and can also be refreshed with **Refresh pages**. Use **Open selected page** to open the selected route, click around, then refresh the selector.
+- `/checkout.html` is tracked by the same `/tracker.js`; once visits and clicks have reached the Events collection, choose `/checkout.html` from the page selector. If its recorded click count is zero, the map will explain that more interactions must be collected first.
