@@ -38,8 +38,12 @@ function Icon({ name, size = 18 }) {
 export default function App() {
   const [tab, setTab] = useState("sessions");
   const [authStatus, setAuthStatus] = useState("checking");
-  const [authConfigured, setAuthConfigured] = useState(true);
-  const [adminUsername, setAdminUsername] = useState("");
+  const [secretConfigured, setSecretConfigured] = useState(true);
+  const [adminConfigured, setAdminConfigured] = useState(true);
+  const [authUsername, setAuthUsername] = useState("");
+  const [authRole, setAuthRole] = useState("admin");
+  const [loginRole, setLoginRole] = useState("admin");
+  const [loginMode, setLoginMode] = useState("login");
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -54,14 +58,16 @@ export default function App() {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Could not check admin session.");
         if (!active) return;
-        setAuthConfigured(data.configured !== false);
+        setSecretConfigured(data.secretConfigured !== false);
+        setAdminConfigured(data.adminConfigured !== false);
         if (data.authenticated) {
-          setAdminUsername(data.username || "admin");
+          setAuthUsername(data.username || "user");
+          setAuthRole(data.role || "user");
           setAuthStatus("authenticated");
         } else {
           setAuthStatus("login");
-          if (data.configured === false) {
-            setLoginError("Admin login is not configured yet. Add the required environment variables in Vercel.");
+          if (data.secretConfigured === false) {
+            setLoginError("Authentication is not configured. Add SESSION_SECRET in Vercel.");
           }
         }
       })
@@ -82,11 +88,12 @@ export default function App() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: loginUsername, password: loginPassword })
+        body: JSON.stringify({ username: loginUsername, password: loginPassword, role: loginRole })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || `Login failed (${response.status})`);
-      setAdminUsername(data.user?.username || loginUsername);
+      setAuthUsername(data.user?.username || loginUsername);
+      setAuthRole(data.user?.role || loginRole);
       setLoginPassword("");
       setLoginError("");
       setAuthStatus("authenticated");
@@ -98,11 +105,41 @@ export default function App() {
     }
   }
 
+  async function handleRegister(event) {
+    event.preventDefault();
+    setLoginBusy(true);
+    setLoginError("");
+    try {
+      const response = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: loginUsername, password: loginPassword })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Registration failed (" + response.status + ")");
+      setAuthUsername(data.user?.username || loginUsername);
+      setAuthRole("user");
+      setLoginRole("user");
+      setLoginPassword("");
+      setLoginError("");
+      setAuthStatus("authenticated");
+      setTab("sessions");
+    } catch (error) {
+      setLoginError(error.message || "Could not create user account.");
+    } finally {
+      setLoginBusy(false);
+    }
+  }
+
   async function handleLogout() {
     try {
       await fetch(`${API}/auth/logout`, { method: "POST", credentials: "include" });
     } finally {
-      setAdminUsername("");
+      setAuthUsername("");
+      setAuthRole("admin");
+      setLoginRole("admin");
+      setLoginMode("login");
       setAuthStatus("login");
       setLoginPassword("");
       setLoginError("");
@@ -131,25 +168,39 @@ export default function App() {
             </div>
           </div>
           <div className="auth-eyebrow">PRIVATE WORKSPACE</div>
-          <h1>Admin sign in</h1>
+          <h1>{loginRole === "admin" ? "Admin sign in" : loginMode === "register" ? "Create user account" : "User sign in"}</h1>
           <p className="auth-description">Sign in to review visitor sessions, user journeys and click heatmaps.</p>
+          <div className="auth-role-switch" role="group" aria-label="Account type">
+            <button type="button" className={loginRole === "user" ? "selected" : ""} onClick={() => { setLoginRole("user"); setLoginMode("login"); setLoginError(""); }}>User</button>
+            <button type="button" className={loginRole === "admin" ? "selected" : ""} onClick={() => { setLoginRole("admin"); setLoginMode("login"); setLoginError(""); }}>Admin</button>
+          </div>
           {loginError && <p className="error auth-error" role="alert">{loginError}</p>}
-          {!authConfigured && <p className="auth-hint">The dashboard remains protected until the admin environment variables are configured.</p>}
-          <form className="auth-form" onSubmit={handleLogin}>
+          {!secretConfigured && <p className="auth-hint">Authentication is not configured. Add SESSION_SECRET in Vercel Environment Variables.</p>}
+          {loginRole === "admin" && !adminConfigured && <p className="auth-hint">Admin login is not configured. Add ADMIN_USERNAME and ADMIN_PASSWORD in Vercel Environment Variables.</p>}
+          <form className="auth-form" onSubmit={loginMode === "register" ? handleRegister : handleLogin}>
             <label>
               <span>Username</span>
               <input value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} name="username" autoComplete="username" required />
             </label>
             <label>
               <span>Password</span>
-              <input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} name="password" type="password" autoComplete="current-password" required />
+              <input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} name="password" type="password" autoComplete={loginMode === "register" ? "new-password" : "current-password"} minLength={loginMode === "register" ? 8 : undefined} required />
             </label>
-            <button className="auth-submit" type="submit" disabled={loginBusy}>
-              {loginBusy ? "Signing in…" : "Sign in to dashboard"}
+            <button className="auth-submit" type="submit" disabled={loginBusy || !secretConfigured || (loginRole === "admin" && !adminConfigured)}>
+              {loginBusy ? "Please wait…" : loginMode === "register" ? "Create user account" : "Sign in as " + loginRole}
             </button>
           </form>
+          {loginRole === "user" && (
+            <div className="auth-mode-toggle">
+              {loginMode === "register" ? (
+                <span>Already have an account? <button type="button" onClick={() => { setLoginMode("login"); setLoginError(""); }}>Sign in</button></span>
+              ) : (
+                <span>New user? <button type="button" onClick={() => { setLoginMode("register"); setLoginError(""); }}>Create account</button></span>
+              )}
+            </div>
+          )}
           <div className="auth-bottom">
-            <span>Visiting the demo website?</span>
+            <span>Just visiting?</span>
             <a href="/demo.html">Open tracked demo ↗</a>
           </div>
         </section>
@@ -229,7 +280,8 @@ export default function App() {
           </div>
           <div className="utility-status">
             <span className="environment-pill"><span /> {isLocalEnvironment ? "Local preview" : "Live environment"}</span>
-            <div className="user-avatar" aria-label="Administrator">{(adminUsername || "A").slice(0, 1).toUpperCase()}</div>
+            <span className="auth-role-chip">{authRole === "admin" ? "ADMIN" : "USER"}</span>
+            <div className="user-avatar" aria-label={authRole === "admin" ? "Administrator" : "User"}>{(authUsername || "U").slice(0, 1).toUpperCase()}</div>
             <button type="button" className="logout-button" onClick={handleLogout}>Sign out</button>
           </div>
         </header>
