@@ -212,7 +212,7 @@ npm start
 Open a second terminal at the repository root and serve the `tracker` directory:
 
 ```bash
-npx serve tracker -l 3000
+npx serve tracker
 ```
 
 Use the local address printed by the static server and open the `demo.html` page. Interact with the page to generate tracking events.
