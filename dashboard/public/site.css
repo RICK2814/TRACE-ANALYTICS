@@ -22,3 +22,46 @@ main{overflow:clip}.hero{display:grid;grid-template-columns:minmax(330px,.86fr) 
 @media(max-width:1080px){.site-header{grid-template-columns:1fr auto;gap:14px;min-height:74px}.site-nav{grid-column:1/-1;display:none;justify-content:flex-start;flex-wrap:wrap;padding:0 0 15px}.site-nav.is-open{display:flex}.header-actions{grid-column:2;grid-row:1}.menu-toggle{display:inline-flex}.hero{grid-template-columns:minmax(280px,.9fr) minmax(340px,1.1fr);gap:32px}.hero-visual{min-height:420px}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}.product-picture{aspect-ratio:4/4.4}.hero-visual-caption{right:-8px}}
 @media(max-width:720px){.announcement{flex-wrap:wrap;gap:5px 10px;min-height:35px;padding:7px 12px;font-size:8px;text-align:center}.site-header{padding:0 17px;min-height:70px}.brand-stamp{width:34px;height:34px;font-size:17px}.brand-word{font-size:10px}.brand-word small{font-size:7px}.header-actions{gap:5px}.bag-button,.signout-button,.menu-toggle{min-height:34px;padding:6px 8px;font-size:10px}.signout-button{max-width:72px}.site-nav{gap:17px}.site-nav a{font-size:11px}.hero{grid-template-columns:1fr;padding:44px 18px 48px;gap:28px}.hero h1{font-size:clamp(47px,13vw,72px)}.hero-copy>p{margin:17px 0;font-size:13px}.actions-row{margin:22px 0}.hero-notes{gap:10px 16px}.hero-visual{min-height:350px;height:90vw;max-height:530px}.hero-visual-caption{right:10px;bottom:40px;max-width:175px;padding:13px}.principles{grid-template-columns:1fr}.principle{padding:17px 21px}.principle+.principle{border-top:1px solid #d9dbd0;border-left:0}.content-section{padding:53px 18px}.section-heading{align-items:flex-start;flex-direction:column;gap:12px}.section-heading h2{font-size:39px}.section-heading p{font-size:11px}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}.product-picture{aspect-ratio:3/4}.product-badge{top:8px;left:8px;font-size:7px}.product-copy{flex-direction:column;gap:3px;padding-top:9px}.product-name{font-size:11px}.product-desc{font-size:9px}.product-actions{margin-top:5px}.add-button{min-height:32px;padding:0 8px;font-size:9px}.product-material{display:none}.story-band{grid-template-columns:1fr}.story-image,.story-image img{min-height:270px;max-height:350px}.story-copy{padding:34px 22px 38px}.story-copy h2{font-size:43px}.category-grid{grid-template-columns:1fr;gap:12px}.category-card{min-height:230px;aspect-ratio:1.6}.newsletter{grid-template-columns:1fr;gap:20px;padding:45px 21px}.newsletter h2{font-size:40px}.site-footer{grid-template-columns:1fr 1fr;gap:26px 20px;padding:32px 21px 25px}.footer-brand{grid-column:1/-1}.footer-bottom{flex-direction:column;gap:5px;padding:13px 21px}.page-hero{grid-template-columns:1fr;padding:44px 18px 30px;gap:23px}.page-hero h1{font-size:54px}.page-hero-image{min-height:260px}.collection-tools{align-items:flex-start;flex-direction:column;gap:10px}.callout-strip{grid-template-columns:1fr;padding:23px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+
+/* Signed-in account identity, styled to match the Trail Co. header. */
+.account-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 190px;
+  padding: 4px 10px 4px 5px;
+  border: 1px solid var(--line);
+  background: rgba(255,254,250,.62);
+}
+.account-pill[hidden] { display: none; }
+.account-avatar {
+  display: inline-grid;
+  flex: 0 0 30px;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--forest);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.account-copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.account-copy strong { display: block; max-width: 112px; overflow: hidden; color: var(--ink); font-size: 10px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.account-copy small { margin-top: 3px; color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .12em; }
+@media (max-width: 720px) {
+  .account-pill { gap: 5px; padding: 3px 6px 3px 3px; max-width: 120px; }
+  .account-avatar { flex-basis: 27px; width: 27px; height: 27px; font-size: 11px; }
+  .account-copy strong { max-width: 66px; font-size: 9px; }
+  .account-copy small { font-size: 7px; }
+  .header-actions { gap: 5px; }
+}
+@media (max-width: 420px) {
+  .account-pill { gap: 4px; padding: 2px; border-color: transparent; background: transparent; }
+  .account-copy strong { max-width: 54px; }
+  .bag-button { gap: 5px; padding-right: 6px; padding-left: 6px; }
+  .signout-button { padding-right: 6px; padding-left: 6px; }
+}
