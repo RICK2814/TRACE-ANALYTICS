@@ -270,6 +270,8 @@ tbody tr:nth-child(5) { animation-delay: .1s; }
 }
 
 @media (max-width: 720px) {
+  .workspace-switcher { margin: 12px 2px 14px; }
+  .workspace-menu { min-width: min(212px, calc(100vw - 34px)); }
   .product-shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { position: static; height: auto; min-height: 0; padding: 12px 14px; border-right: 0; border-bottom: 1px solid #2a332c; }
   .brand-lockup { padding: 0 2px; }
