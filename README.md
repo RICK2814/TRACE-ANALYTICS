@@ -55,6 +55,28 @@ The repository includes a small outdoor-retail storefront to make the tracker ea
 
 ---
 
+## Reviewer Login (Evaluation Demo)
+
+Use the hosted application to review the Admin dashboard:
+
+**Application:** [TRACE Analytics](https://trace-analytics-one.vercel.app/)
+
+| Field | Evaluation value |
+|---|---|
+| Role | **Admin** |
+| Username | `traceadmin` |
+| Password | `admin123` |
+
+1. Open the application and select **Admin** on the sign-in screen.
+2. Enter the credentials above and sign in.
+3. Explore **Sessions**, **User Journey**, **Click heatmap**, and the workspace switcher.
+
+**Important — demo access only:** These shared credentials are intentionally provided for assignment evaluation. Anyone who can read this public repository can see them, and Admin access includes visitor analytics and workspace management. Do not use this password for a personal account, real customer data, or a production system. Rotate the password after the review.
+
+**Deployment status:** The Vercel Production environment variables have been set to the values above. Vercel requires a new deployment for environment-variable changes to take effect. If login is not yet accepted on the hosted URL, the current deployment may still be using the previously deployed environment; redeploy the latest `main` revision and then retry. Never add `ADMIN_PASSWORD`, `SESSION_SECRET`, or `MONGO_URI` to source code.
+
+---
+
 ## Assignment Requirements Coverage
 
 The implementation is mapped to the requirements in the *Build a Simple User Analytics Application* assignment.
